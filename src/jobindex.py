@@ -9,36 +9,42 @@ import re
 
 class JobIndex:
     '''Class that queries jobindex.dk for job listings'''
-
     base_url: str = 'https://www.jobindex.dk'
+
+    def __init__(self, num_pages: int = 3):
+        self.num_pages = num_pages
 
     def query(self,
               query: str,
-              area: str = 'storkoebenhavn',
-              num_pages: int = 3) -> List[str]:
+              urls_to_ignore: List[str] = list(),
+              area: str = 'storkoebenhavn') -> List[dict]:
         '''Query jobindex.dk for job listings.
 
         Args:
             query (str):
                 The query to search for.
+            urls_to_ignore (list of str, optional):
+                A list of urls to ignore. Defaults to an empty list.
             area (str, optional):
                 The area to search in. Defaults to 'storkoebenhavn'.
-            num_pages (int, optional):
-                The number of pages to search. Defaults to 3.
 
         Returns:
-            list of str:
-                A list of job listings.
+            list of dict:
+                A list of job listings, with each listing being dicts with keys
+                'url' and 'text'.
         '''
         # Initialise the list of urls to the job listings
         urls = list()
 
         # Iterate over the search result pages
-        for page in tqdm(range(1, num_pages + 1), desc='Finding job ads'):
+        desc = f'Querying jobindex.dk for {query}'
+        for page in tqdm(range(1, self.num_pages + 1), desc=desc, leave=False):
 
             # Query jobindex.dk for job listings
             url = f'{self.base_url}/jobsoegning/{area}'
-            response = requests.get(url, params=dict(q=query, page=page))
+            response = requests.get(url,
+                                    params=dict(q=query, page=page),
+                                    allow_redirects=True)
 
             # Parse the response
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -57,14 +63,20 @@ class JobIndex:
             # tag as a child
             for job in jobs:
                 url = [a['href'] for a in job.find_all('a') if a.b][0]
-                urls.append(url)
+                if url not in urls_to_ignore:
+                    urls.append(url)
 
         # For each URL, get the job listing
         job_listings = list()
-        for url in tqdm(urls, desc='Parsing job ads'):
+        desc = f'Parsing jobindex.dk job listings for {query}'
+        for url in tqdm(urls, desc=desc, leave=False):
 
-            # Query jobindex.dk for the job listing
-            response = requests.get(url)
+            # Query jobindex.dk for the job listing. If this results in an
+            # error then skip the job listing
+            try:
+                response = requests.get(url)
+            except requests.exceptions.RequestException:
+                continue
 
             # Parse the response if the response is successful
             if response.status_code == 200:
@@ -79,7 +91,7 @@ class JobIndex:
                 job_listing = self._clean_job_listing(job_listing)
 
                 # Store the cleaned job listing in the list of job listings
-                job_listings.append(job_listing)
+                job_listings.append(dict(url=url, text=job_listing))
 
         # Return the list of job listings
         return job_listings
