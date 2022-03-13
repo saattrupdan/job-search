@@ -8,7 +8,25 @@ from tqdm.auto import tqdm
 
 
 class JobFinder:
-    '''Class that queries job listings from various sites and filters them'''
+    '''Class that queries job listings from various sites and filters them.
+
+    Args:
+        queries (list of str):
+            List of queries to search for.
+        num_pages (int, optional):
+            Number of pages to search for each query. Defaults to 3.
+        listing_path (str or Path, optional):
+            Path to save job listings to. Defaults to 'data/job_listings.jsonl'.
+        overwrite (bool, optional):
+            Whether to overwrite the listing_path if it already exists.
+            Defaults to False.
+
+    Attributes:
+        queries (list of str): List of queries to search for.
+        num_pages (int): Number of pages to search for each query.
+        listing_path (str or Path): Path to save job listings to.
+        overwrite (bool): Whether to overwrite existing listings.
+    '''
     def __init__(self,
                  queries: List[str],
                  num_pages: int = 3,
@@ -49,6 +67,7 @@ class JobFinder:
         '''
         with self.listing_path.open('a') as f:
             for job_listing in job_listings:
+                job_listing['text'] = job_listing['text'][:100_000]
                 f.write(json.dumps(job_listing))
                 f.write('\n')
 
