@@ -5,6 +5,7 @@ from typing import List, Union
 from pathlib import Path
 import json
 from tqdm.auto import tqdm
+from utils import clean_job_listing
 
 
 class JobFinder:
@@ -50,15 +51,34 @@ class JobFinder:
                 self._urls = [json.loads(line)['url'] for line in f]
 
     def update_jobs(self):
-        '''Finds jobs from all job sites'''
+        '''Finds and cleans job listings from all job sites'''
 
-        # Collect job listings from all job sites
+        # Query all the job sites for all the queries and save the job listings
+        # to disk
         for query in tqdm(self.queries, desc='Fetching and parsing jobs'):
             for job_site in self._job_sites:
                 job_listings = job_site.query(query, urls_to_ignore=self._urls)
-                self._store_job_listings(job_listings)
+                self._store_jobs(job_listings)
 
-    def _store_job_listings(self, job_listings: List[dict]):
+        # Clean all the job listings on disk
+        self.clean_jobs()
+
+    def clean_jobs(self):
+        '''Cleans all the stored job listings'''
+        if self.listing_path.exists():
+
+            # Open the file and read in all the job listings
+            with self.listing_path.open('r') as f:
+                job_listings = [json.loads(line) for line in f]
+                pbar = tqdm(job_listings, desc='Cleaning job listings')
+                for idx, job_listing in enumerate(pbar):
+                    cleaned = clean_job_listing(job_listing)
+                    job_listings[idx]['cleaned_text'] = cleaned
+
+            # Store the cleaned job listings
+            self._store_jobs(job_listings)
+
+    def _store_jobs(self, job_listings: List[dict]):
         '''Stores job listings to a JSONL file.
 
         Args:

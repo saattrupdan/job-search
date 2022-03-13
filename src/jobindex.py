@@ -95,9 +95,6 @@ class JobIndex:
                 # Extract the text of the job listing
                 job_listing = job_listing.get_text()
 
-                # Clean the job listing
-                job_listing = clean_job_listing(job_listing)
-
                 # Store the cleaned job listing in the list of job listings
                 job_listings.append(dict(url=url, text=job_listing))
 
