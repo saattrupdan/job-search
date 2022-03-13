@@ -72,7 +72,7 @@ class JobFinder:
                 job_listings = [json.loads(line) for line in f]
                 pbar = tqdm(job_listings, desc='Cleaning job listings')
                 for idx, job_listing in enumerate(pbar):
-                    cleaned = clean_job_listing(job_listing)
+                    cleaned = clean_job_listing(job_listing['text'])
                     job_listings[idx]['cleaned_text'] = cleaned
 
             # Store the cleaned job listings
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     ]
 
     # Create JobFinder
-    job_finder = JobFinder(queries=queries, overwrite=True)
+    job_finder = JobFinder(queries=queries)
 
     # Update file with job listings
     job_finder.update_jobs()
