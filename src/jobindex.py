@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 from typing import List
 import re
+from utils import IGNORED_PARAGRAPHS
 
 
 class JobIndex:
@@ -74,7 +75,7 @@ class JobIndex:
             # Query jobindex.dk for the job listing. If this results in an
             # error then skip the job listing
             try:
-                response = requests.get(url)
+                response = requests.get(url, allow_redirects=True)
             except requests.exceptions.RequestException:
                 continue
 
@@ -109,32 +110,49 @@ class JobIndex:
             str:
                 The cleaned job listing.
         '''
-        # Replace emails by 'EMAIL'
+        # Replace emails with email tag
         email_regex = r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+'
-        job_listing = re.sub(email_regex, 'EMAIL', job_listing)
+        job_listing = re.sub(email_regex, '<email>', job_listing)
 
-        # Replace phone numbers by 'PHONE'
+        # Replace phone numbers with phone tag
         phone_regex = r'(\+[0-9]{1,2} ?)?([0-9]{2} ?){3}[0-9]{2}'
-        job_listing = re.sub(phone_regex, 'PHONE', job_listing)
+        job_listing = re.sub(phone_regex, '<phone>', job_listing)
 
-        # Replace URLs by 'URL'
+        # Replace URLs by url tag
         url_regex = r'(https?://|www\.)[^\s]+'
-        job_listing = re.sub(url_regex, 'URL', job_listing)
+        job_listing = re.sub(url_regex, '<url>', job_listing)
 
         # Convert tabs to spaces
         job_listing = re.sub('\t', ' ', job_listing)
 
-        # Strip whitespace
-        job_listing = job_listing.strip()
+        # Convert \r to \n
+        job_listing = re.sub('\r', '\n', job_listing)
 
-        # Remove whitespace after newlines
-        job_listing = re.sub('\n +', '\n', job_listing)
+        # Remove empty whitespace
+        job_listing = re.sub('\xa0', ' ', job_listing)
 
-        # Remove more than two consecutive newlines
-        job_listing = re.sub('\n\n+', '\n\n', job_listing)
+        # Convert job listing to lowercase
+        job_listing = job_listing.lower()
 
-        # Remove consecutive whitespace
+        # Remove paragraphs that are shorter than or equal to 3 words
+        all_paragraphs = job_listing.split('\n')
+        filtered_paragraphs = [p.strip() for p in all_paragraphs
+                               if len(p.split()) > 3]
+        job_listing = '\n'.join(filtered_paragraphs)
+
+        # Remove all paragraphs that matches the ignored paragraphs
+        for ignored_paragraph in IGNORED_PARAGRAPHS:
+            regex_first_paragraph = f'^.*{ignored_paragraph}.*(?=\n)'
+            regex_middle_paragraphs = f'(?<=\n).*{ignored_paragraph}.*(?=\n)'
+            regex_last_paragraph = f'(?<=\n).*{ignored_paragraph}.*$'
+            job_listing = re.sub(regex_first_paragraph, '', job_listing)
+            job_listing = re.sub(regex_middle_paragraphs, '', job_listing)
+            job_listing = re.sub(regex_last_paragraph, '', job_listing)
+
+        # Remove consecutive whitespace and newlines
         job_listing = re.sub(' +', ' ', job_listing)
+        job_listing = re.sub('\n+', '\n', job_listing)
+        job_listing = job_listing.strip()
 
         # Return the cleaned job listing
         return job_listing
