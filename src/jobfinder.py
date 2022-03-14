@@ -120,7 +120,7 @@ if __name__ == '__main__':
     ]
 
     # Create JobFinder
-    job_finder = JobFinder(queries=queries)
+    job_finder = JobFinder(queries=queries, overwrite=False)
 
     # Update file with job listings
     job_finder.update_jobs()
