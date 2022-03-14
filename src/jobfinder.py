@@ -76,16 +76,19 @@ class JobFinder:
                     job_listings[idx]['cleaned_text'] = cleaned
 
             # Store the cleaned job listings
-            self._store_jobs(job_listings)
+            self._store_jobs(job_listings, overwrite=True)
 
-    def _store_jobs(self, job_listings: List[dict]):
+    def _store_jobs(self, job_listings: List[dict], overwrite: bool = False):
         '''Stores job listings to a JSONL file.
 
         Args:
             job_listings (list of dict):
                 List of job listings to store.
+            overwrite (bool, optional):
+                Whether to overwrite the listing_path if it already exists.
+                Defaults to False.
         '''
-        with self.listing_path.open('a') as f:
+        with self.listing_path.open('w' if overwrite else 'a') as f:
             for job_listing in job_listings:
                 job_listing['text'] = job_listing['text'][:100_000]
                 f.write(json.dumps(job_listing))
