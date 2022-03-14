@@ -15,7 +15,7 @@ class JobFinder:
         queries (list of str):
             List of queries to search for.
         num_pages (int, optional):
-            Number of pages to search for each query. Defaults to 3.
+            Number of pages to search for each query. Defaults to 10.
         listing_path (str or Path, optional):
             Path to save job listings to. Defaults to 'data/job_listings.jsonl'.
         overwrite (bool, optional):
@@ -30,7 +30,7 @@ class JobFinder:
     '''
     def __init__(self,
                  queries: List[str],
-                 num_pages: int = 3,
+                 num_pages: int = 10,
                  listing_path: Union[str, Path] = 'data/job_listings.jsonl',
                  overwrite: bool = False):
         self.queries = queries
