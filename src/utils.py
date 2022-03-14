@@ -14,7 +14,7 @@ IGNORED_PARAGRAPHS = [
     'næste arbejdsplads',
     'jobsamtale',
     'send me alerts',
-    'start applying with linkedin',
+    'linkedin',
     'please contact your manager',
     'press tab to ',
     'job req number',
@@ -98,6 +98,9 @@ IGNORED_PARAGRAPHS = [
     'recipient e-mail address',
     'your recruitment process',
     'satisfied with your job',
+    'tryk på tab for at skifte til gå til indholdslink',
+    'send mig beskeder hver dag',
+    'facebook',
 ]
 
 
