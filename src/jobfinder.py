@@ -6,9 +6,14 @@ from pathlib import Path
 import json
 from tqdm.auto import tqdm
 from utils import clean_job_listing
+import pandas
 
 
-class JobFinder:
+# Enable tqdm with pandas
+tqdm.pandas()
+
+
+class JobScraper:
     '''Class that queries job listings from various sites and filters them.
 
     Args:
@@ -50,7 +55,7 @@ class JobFinder:
             with self.listing_path.open('r') as f:
                 self._urls = [json.loads(line)['url'] for line in f]
 
-    def update_jobs(self):
+    def scrape_jobs(self):
         '''Finds and cleans job listings from all job sites'''
 
         # Query all the job sites for all the queries and save the job listings
@@ -70,13 +75,21 @@ class JobFinder:
             # Open the file and read in all the job listings
             with self.listing_path.open('r') as f:
                 job_listings = [json.loads(line) for line in f]
-                pbar = tqdm(job_listings, desc='Cleaning job listings')
-                for idx, job_listing in enumerate(pbar):
-                    cleaned = clean_job_listing(job_listing['text'])
-                    job_listings[idx]['cleaned_text'] = cleaned
+
+            # Convert the job listings to a Pandas DataFrame
+            df = pandas.DataFrame.from_records(job_listings)
+
+            # Drop duplicates in the job listings
+            df.drop_duplicates(subset='url', inplace=True)
+
+            # Truncate the `text` column to 100,000 characters
+            df['text'] = df.text.apply(lambda x: x[:100_000])
+
+            # Add a `cleaned_text` column to the DataFrame
+            df['cleaned_text'] = df.text.progress_apply(clean_job_listing)
 
             # Store the cleaned job listings
-            self._store_jobs(job_listings, overwrite=True)
+            self._store_jobs(df.to_dict('records'), overwrite=True)
 
     def _store_jobs(self, job_listings: List[dict], overwrite: bool = False):
         '''Stores job listings to a JSONL file.
@@ -90,7 +103,6 @@ class JobFinder:
         '''
         with self.listing_path.open('w' if overwrite else 'a') as f:
             for job_listing in job_listings:
-                job_listing['text'] = job_listing['text'][:100_000]
                 f.write(json.dumps(job_listing))
                 f.write('\n')
 
@@ -120,7 +132,7 @@ if __name__ == '__main__':
     ]
 
     # Create JobFinder
-    job_finder = JobFinder(queries=queries, overwrite=False)
+    job_finder = JobScraper(queries=queries, overwrite=False)
 
     # Update file with job listings
-    job_finder.update_jobs()
+    job_finder.scrape_jobs()
