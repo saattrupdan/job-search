@@ -1,6 +1,5 @@
 '''Class that queries job listings from various sites and filters them'''
 
-from jobindex import JobIndex
 from typing import List, Union
 from pathlib import Path
 import json
@@ -8,6 +7,9 @@ from tqdm.auto import tqdm
 from utils import clean_job_listing
 import pandas
 
+from jobindex import JobIndex
+from dtu import DTU
+from thehub import TheHub
 
 # Enable tqdm with pandas
 tqdm.pandas()
@@ -35,14 +37,18 @@ class JobScraper:
     '''
     def __init__(self,
                  queries: List[str],
-                 num_pages: int = 10,
+                 num_pages: int = 3,
                  listing_path: Union[str, Path] = 'data/job_listings.jsonl',
                  overwrite: bool = False):
         self.queries = queries
         self.num_pages = num_pages
         self.listing_path = Path(listing_path)
         self.overwrite = overwrite
-        self._job_sites = [JobIndex(num_pages=num_pages)]
+        self._job_sites = [
+            JobIndex(num_pages=num_pages),
+            TheHub(num_pages=num_pages),
+            DTU()
+        ]
         self._urls = list()
 
         # If we are overwriting then delete the file
@@ -60,9 +66,15 @@ class JobScraper:
 
         # Query all the job sites for all the queries and save the job listings
         # to disk
-        for query in tqdm(self.queries, desc='Fetching and parsing jobs'):
-            for job_site in self._job_sites:
-                job_listings = job_site.query(query, urls_to_ignore=self._urls)
+        for job_site in self._job_sites:
+            if job_site.uses_queries:
+                desc = f'Fetching and parsing jobs from {job_site.name}'
+                for query in tqdm(self.queries, desc=desc):
+                    job_listings = job_site.query(query=query,
+                                                  urls_to_ignore=self._urls)
+                    self._store_jobs(job_listings)
+            else:
+                job_listings = job_site.query(urls_to_ignore=self._urls)
                 self._store_jobs(job_listings)
 
         # Clean all the job listings on disk
@@ -106,33 +118,40 @@ class JobScraper:
                 f.write(json.dumps(job_listing))
                 f.write('\n')
 
+    def close(self):
+        '''Closes the job sites'''
+        for job_site in self._job_sites:
+            job_site.close()
+
 
 if __name__ == '__main__':
     # Create list of relevant queries
     queries = [
         'analytical chemistry',
-        'biosensors',
+        'biosensor',
         'gc-ms',
         'electrochemistry',
         'electroanalytical chemistry',
         'separation science',
         'chromatography',
         'lab on a chip',
-        'biosensors',
-        'electrochemical sensors',
+        'electrochemical sensor',
         'ceramic sensors',
-        'metal oxide sensors',
+        'metal oxide sensor',
         'electronic nose',
         'VOC',
         'volatile',
         'mVOC',
         'bVOC',
-        'metabolite volatile',
+        'metabolite',
         'gas analysis'
     ]
 
-    # Create JobFinder
-    job_finder = JobScraper(queries=queries, overwrite=False)
+    # Create job scraper
+    job_scraper = JobScraper(queries=queries, overwrite=True, num_pages=10)
 
     # Update file with job listings
-    job_finder.scrape_jobs()
+    job_scraper.scrape_jobs()
+
+    # Close the job_scraper
+    job_scraper.close()
