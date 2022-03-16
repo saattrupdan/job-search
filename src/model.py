@@ -11,10 +11,14 @@ import numpy as np
 from pathlib import Path
 import warnings
 import json
+import os
 
 
 def train_model():
     '''Trains the model and stores it to disk'''
+
+    # Disable tokenizers parallelization
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     # Set up pretrained model ID
     model_id = 'markussagen/xlm-roberta-longformer-base-4096'
@@ -80,6 +84,7 @@ def train_model():
         evaluation_strategy='steps',
         logging_steps=10,
         eval_steps=50,
+        report_to=None,
     )
 
     # Initialise the trainer
