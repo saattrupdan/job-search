@@ -78,13 +78,13 @@ def train_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=100,
+        num_train_epochs=1000,
         per_device_train_batch_size=1,
         per_device_eval_batch_size=1,
         gradient_accumulation_steps=16,
         learning_rate=2e-5,
         evaluation_strategy='steps',
-        logging_steps=1,
+        logging_steps=10,
         eval_steps=10,
         report_to='none',
     )
