@@ -66,24 +66,34 @@ class JobScraper:
             with self.listing_path.open('r') as f:
                 self._urls = [json.loads(line)['url'] for line in f]
 
-    def scrape_jobs(self):
-        '''Finds and cleans job listings from all job sites'''
+    def scrape_jobs(self) -> List[dict]:
+        '''Finds and cleans job listings from all job sites.
 
+        Returns:
+            list of dict:
+                List of job listings.
+        '''
         # Query all the job sites for all the queries and save the job listings
         # to disk
+        all_job_listings = list()
         for job_site in self._job_sites:
             if job_site.uses_queries:
                 desc = f'Fetching and parsing jobs from {job_site.name}'
                 for query in tqdm(self.queries, desc=desc):
                     job_listings = job_site.query(query=query,
                                                   urls_to_ignore=self._urls)
+                    all_job_listings.extend(job_listings)
                     self._store_jobs(job_listings)
             else:
                 job_listings = job_site.query(urls_to_ignore=self._urls)
+                all_job_listings.extend(job_listings)
                 self._store_jobs(job_listings)
 
         # Clean all the job listings on disk
         self.clean_jobs()
+
+        # Return the new job listings
+        return all_job_listings
 
     def clean_jobs(self):
         '''Cleans all the stored job listings'''
