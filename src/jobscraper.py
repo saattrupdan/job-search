@@ -49,10 +49,10 @@ class JobScraper:
         self.overwrite = overwrite
         self.headless = headless
         self._job_sites = [
-            #JobIndex(num_pages=num_pages, headless=headless),
-            #TheHub(num_pages=num_pages, headless=headless),
+            JobIndex(num_pages=num_pages, headless=headless),
+            TheHub(num_pages=num_pages, headless=headless),
             KU(num_pages=num_pages, headless=headless),
-            #DTU(headless=headless),
+            DTU(headless=headless),
         ]
         self._urls = list()
 
@@ -130,6 +130,7 @@ class JobScraper:
 
 
 if __name__ == '__main__':
+
     # Create list of relevant queries
     queries = [
         'analytical chemistry',
@@ -153,10 +154,9 @@ if __name__ == '__main__':
     ]
 
     # Create job scraper
-    job_scraper = JobScraper(queries=queries,
-                             overwrite=True,
-                             num_pages=10,
-                             headless=False)
+    job_scraper = JobScraper(queries=queries)
+                             #overwrite=True,
+                             #num_pages=10)
 
     # Update file with job listings
     job_scraper.scrape_jobs()
