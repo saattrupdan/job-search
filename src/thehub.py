@@ -1,16 +1,12 @@
 '''Class that queries thehub.io for job listings'''
 
-from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
 from typing import List
-import chromedriver_autoinstaller as chrome_installer
-from selenium import webdriver
-from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
-from time import sleep
+from base_scraper import BaseScraper
 
 
-class TheHub:
+class TheHub(BaseScraper):
     '''Class that queries thehub.io for job listings.
 
     Args:
@@ -20,30 +16,19 @@ class TheHub:
     Attributes:
         num_pages (int): Number of pages to query.
     '''
-    name = 'the Hub'
     base_url: str = 'https://thehub.io'
     uses_queries: bool = True
 
-    def __init__(self, num_pages: int = 3):
+    def __init__(self, num_pages: int = 3, **kwargs):
+        super().__init__(**kwargs)
         self.num_pages = num_pages
-        chrome_installer.install()
-
-        # Initialise Chrome web driver
-        options = ChromeOptions()
-        options.headless = True
-        self._driver = webdriver.Chrome(chrome_options=options)
 
         # Accept cookies
-        self._driver.get(self.base_url)
-        sleep(10)
+        self._get(self.base_url)
         (self._driver.find_element(by=By.ID, value='coiConsentBannerBase')
              .find_elements(by=By.TAG_NAME, value='div')[0]
              .find_elements(by=By.TAG_NAME, value='button')[0]
              .click())
-
-    def close(self):
-        '''Close the web driver'''
-        self._driver.close()
 
     def query(self,
               query: str,
@@ -72,13 +57,12 @@ class TheHub:
         for page in tqdm(range(1, self.num_pages + 1), desc=desc, leave=False):
 
             # Query thehub.io for job listings
-            url = (f'{self.base_url}/jobs?search={query}&location={area}&'
-                   f'countryCode=DK&sorting=mostPopular&page={page}')
-            self._driver.get(url)
-            sleep(10)
-
-            # Parse the response
-            soup = BeautifulSoup(self._driver.page_source, 'html.parser')
+            params = dict(search=query,
+                          location=area,
+                          countryCode='DK',
+                          sorting='mostPopular',
+                          page=page)
+            soup = self._get(self.base_url + '/jobs', params=params)
 
             # If there are no results then break
             if soup.find('div', class_='no-results'):
@@ -96,20 +80,15 @@ class TheHub:
         for url in tqdm(all_urls, desc=desc, leave=False):
 
             # Query thehub.io for the job listing
-            self._driver.get(url)
-            sleep(10)
-
-            # Parse the response
-            job_listing = BeautifulSoup(self._driver.page_source,
-                                        'html.parser')
+            soup = self._get(url)
 
             # Extract the title of the job listing
             class_name = 'view-job-details__title'
-            title = job_listing.find('h2', class_=class_name).get_text()
+            title = soup.find('h2', class_=class_name).get_text()
 
             # Extract the text of the job listing
             class_name = 'text-block__content text-block__content--default'
-            content = job_listing.find('content', class_=class_name).get_text()
+            content = soup.find('content', class_=class_name).get_text()
 
             # Concatenate the title and text
             text = title + '\n' + content

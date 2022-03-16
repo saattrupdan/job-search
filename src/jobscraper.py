@@ -10,6 +10,8 @@ import pandas
 from jobindex import JobIndex
 from dtu import DTU
 from thehub import TheHub
+from ku import KU
+
 
 # Enable tqdm with pandas
 tqdm.pandas()
@@ -39,15 +41,18 @@ class JobScraper:
                  queries: List[str],
                  num_pages: int = 3,
                  listing_path: Union[str, Path] = 'data/job_listings.jsonl',
-                 overwrite: bool = False):
+                 overwrite: bool = False,
+                 headless: bool = True):
         self.queries = queries
         self.num_pages = num_pages
         self.listing_path = Path(listing_path)
         self.overwrite = overwrite
+        self.headless = headless
         self._job_sites = [
-            JobIndex(num_pages=num_pages),
-            TheHub(num_pages=num_pages),
-            DTU()
+            #JobIndex(num_pages=num_pages, headless=headless),
+            #TheHub(num_pages=num_pages, headless=headless),
+            KU(num_pages=num_pages, headless=headless),
+            #DTU(headless=headless),
         ]
         self._urls = list()
 
@@ -148,7 +153,10 @@ if __name__ == '__main__':
     ]
 
     # Create job scraper
-    job_scraper = JobScraper(queries=queries, overwrite=True, num_pages=10)
+    job_scraper = JobScraper(queries=queries,
+                             overwrite=True,
+                             num_pages=10,
+                             headless=False)
 
     # Update file with job listings
     job_scraper.scrape_jobs()

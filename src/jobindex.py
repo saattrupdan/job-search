@@ -1,16 +1,12 @@
 '''Class that queries jobindex.dk for job listings'''
 
-from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
-from typing import List
-import chromedriver_autoinstaller as chrome_installer
-from selenium import webdriver
-from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
-from time import sleep
+from typing import List
+from base_scraper import BaseScraper
 
 
-class JobIndex:
+class JobIndex(BaseScraper):
     '''Class that queries jobindex.dk for job listings.
 
     Args:
@@ -20,31 +16,21 @@ class JobIndex:
     Attributes:
         num_pages (int): Number of pages to query.
     '''
-    name = 'jobindex'
     base_url: str = 'https://www.jobindex.dk/jobsoegning'
     uses_queries: bool = True
 
-    def __init__(self, num_pages: int = 3):
+    def __init__(self, num_pages: int = 3, **kwargs):
+        super().__init__(**kwargs)
         self.num_pages = num_pages
-        chrome_installer.install()
-
-        # Initialise Chrome web driver
-        options = ChromeOptions()
-        options.headless = True
-        self._driver = webdriver.Chrome(chrome_options=options)
 
         # Accept cookies and remove popups
+        self._get(self.base_url)
         self._driver.get(self.base_url)
-        sleep(10)
         consent_btn_id = 'jix-cookie-consent-accept-all'
         self._driver.find_element(by=By.ID, value=consent_btn_id).click()
         (self._driver.find_element(by=By.ID, value='jobmail_popup_block')
                      .find_element(by=By.CLASS_NAME, value='close')
                      .click())
-
-    def close(self):
-        '''Close the web driver'''
-        self._driver.close()
 
     def query(self,
               query: str,
@@ -76,12 +62,8 @@ class JobIndex:
         for page in tqdm(range(1, self.num_pages + 1), desc=desc, leave=False):
 
             # Query jobindex.dk for job listings
-            url = f'{self.base_url}/{area}?q={query}&page={page}'
-            self._driver.get(url)
-            sleep(10)
-
-            # Parse the response
-            soup = BeautifulSoup(self._driver.page_source, 'html.parser')
+            params = dict(q=query, page=page)
+            soup = self._get(self.base_url + '/' + area, params=params)
 
             # Get the div tag that contains the job listings, having the id
             # 'result_list_box'
@@ -106,18 +88,10 @@ class JobIndex:
         for url in tqdm(urls, desc=desc, leave=False):
 
             # Query jobindex.dk for the job listing
-            self._driver.get(url)
-            sleep(10)
-
-            # Parse the response
-            job_listing = BeautifulSoup(self._driver.page_source,
-                                        'html.parser')
-
-            # Extract the text of the job listing
-            job_listing = job_listing.get_text()
+            text = self._get(url).get_text()
 
             # Store the cleaned job listing in the list of job listings
-            job_listings.append(dict(url=url, text=job_listing))
+            job_listings.append(dict(url=url, text=text))
 
         # Return the list of job listings
         return job_listings
