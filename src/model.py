@@ -77,14 +77,14 @@ def train_model():
     training_args = TrainingArguments(
         output_dir='.',
         num_train_epochs=100,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
-        gradient_accumulation_steps=4,
+        per_device_train_batch_size=2,
+        per_device_eval_batch_size=2,
+        gradient_accumulation_steps=16,
         learning_rate=2e-5,
         evaluation_strategy='steps',
         logging_steps=10,
         eval_steps=50,
-        report_to=None,
+        report_to='none',
     )
 
     # Initialise the trainer
