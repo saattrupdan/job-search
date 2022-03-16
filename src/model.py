@@ -56,7 +56,7 @@ def train_model():
 
     # Tokenize the corpus
     def tokenize(example: dict):
-        return tokenizer(example['text'], truncation=True, max_length=2048)
+        return tokenizer(example['text'], truncation=True, max_length=1024)
     train = train.map(tokenize)
     val = val.map(tokenize)
 
