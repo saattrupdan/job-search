@@ -12,6 +12,7 @@ from pathlib import Path
 import pandas as pd
 import json
 import os
+from multilabel_trainer import MultiLabelTrainer
 
 
 def train_model():
@@ -104,7 +105,7 @@ def train_model():
     )
 
     # Initialise the trainer
-    trainer = Trainer(
+    trainer = MultiLabelTrainer(
         model=model,
         args=training_args,
         train_dataset=train,
