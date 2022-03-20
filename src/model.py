@@ -56,8 +56,6 @@ def train_model():
     train = train.map(tokenize)
     val = val.map(tokenize)
 
-    breakpoint()
-
     # Initialise the model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
@@ -89,11 +87,11 @@ def train_model():
         evaluation_strategy='steps',
         logging_steps=50,
         eval_steps=50,
-        report_to='none',
+        report_to='none'
     )
 
     # Initialise the trainer
-    trainer = Trainer(
+    trainer = MultiLabelTrainer(
         model=model,
         args=training_args,
         train_dataset=train,
