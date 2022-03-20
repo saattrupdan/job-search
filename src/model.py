@@ -70,9 +70,9 @@ def train_model():
     recall_metric = load_metric('recall')
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
+        breakpoint()
         preds = np.argmax(preds, axis=1)
         params = dict(predictions=preds, references=labels, average=None)
-        breakpoint()
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
         recall = recall_metric.compute(**params)
