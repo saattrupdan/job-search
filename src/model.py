@@ -31,9 +31,8 @@ def train_model():
 
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
-    #df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
-    #df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
-    df = df.bad.explode('bad')
+    df = df[['cleaned_text', 'bad']]#'title_or_tasks', 'requirements', 'bad']]
+    df = df.explode(['cleaned_text', 'bad'])#'title_or_tasks', 'requirements', 'bad'])
 
     # Convert the data to a HuggingFace dataset
     #labels = df[['title_or_tasks', 'requirements', 'bad']].values
