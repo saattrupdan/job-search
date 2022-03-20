@@ -59,7 +59,7 @@ def train_model():
     # Initialise the model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
-        num_labels=3,
+        num_labels=2,
         #hidden_dropout_prob=0.5,
         #classifier_dropout=0.5,
     )
