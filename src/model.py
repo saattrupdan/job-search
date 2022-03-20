@@ -83,7 +83,7 @@ def train_model():
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
         preds = np.argmax(preds, axis=1)
-        params = dict(predictions=preds, references=labels, average='none')
+        params = dict(predictions=preds, references=labels, average=None)
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
         recall = recall_metric.compute(**params)
