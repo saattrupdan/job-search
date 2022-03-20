@@ -30,7 +30,7 @@ def train_model():
 
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
-    df = df[['cleaned_text', 'title_or_tasks', 'requirements']]
+    df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
     df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
 
     # Create `labels` column
