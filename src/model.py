@@ -66,6 +66,8 @@ def train_model():
     train = train.map(tokenize)
     val = val.map(tokenize)
 
+    breakpoint()
+
     # Initialise the model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
