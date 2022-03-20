@@ -98,7 +98,7 @@ def train_model():
         args=training_args,
         train_dataset=train,
         eval_dataset=val,
-        compute_metrics=compute_metrics,
+        #compute_metrics=compute_metrics,
         data_collator=data_collator,
     )
 
