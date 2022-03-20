@@ -70,8 +70,8 @@ def train_model():
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
         num_labels=3,
-        hidden_dropout_prob=0.5,
-        classifier_dropout=0.5,
+        #hidden_dropout_prob=0.5,
+        #classifier_dropout=0.5,
     )
 
     # Load the F1 metric and define the `compute_metrics` function
