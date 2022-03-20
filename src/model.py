@@ -72,6 +72,7 @@ def train_model():
         preds, labels = eval_pred
         preds = np.argmax(preds, axis=1)
         params = dict(predictions=preds, references=labels, average=None)
+        breakpoint()
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
         recall = recall_metric.compute(**params)

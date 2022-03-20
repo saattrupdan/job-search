@@ -14,4 +14,5 @@ class MultiLabelTrainer(Trainer):
         loss_fct = nn.BCEWithLogitsLoss()
         loss = loss_fct(logits.view(-1, self.model.config.num_labels),
                         labels.float().view(-1, self.model.config.num_labels))
+        breakpoint()
         return (loss, logits) if return_outputs else loss
