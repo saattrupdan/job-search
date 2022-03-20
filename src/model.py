@@ -75,7 +75,7 @@ def train_model():
     )
 
     # Load the F1 metric and define the `compute_metrics` function
-    f1_metric = load_metric('f1', average='macro')
+    f1_metric = load_metric('f1', average='none')
     precision_metric = load_metric('precision', average='macro')
     recall_metric = load_metric('recall', average='macro')
     def compute_metrics(eval_pred):
