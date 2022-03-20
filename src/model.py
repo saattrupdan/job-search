@@ -94,7 +94,7 @@ def train_model():
     )
 
     # Initialise the trainer
-    trainer = Trainer(
+    trainer = MultiLabelTrainer(
         model=model,
         args=training_args,
         train_dataset=train,
