@@ -9,7 +9,7 @@ from transformers import (AutoTokenizer,
 
 import numpy as np
 from pathlib import Path
-import warnings
+import pandas as pd
 import json
 import os
 
@@ -21,27 +21,33 @@ def train_model():
     os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
     # Set up pretrained model ID
-    model_id = 'markussagen/xlm-roberta-longformer-base-4096'
+    model_id = 'xlm-roberta-base'
 
-    # Load the data
-    data_path = Path('data') / 'job_listings.jsonl'
+    # Load the paragraph data
+    data_path = Path('data') / 'job_listing_paragraphs.jsonl'
     with data_path.open('r') as f:
         job_listings = [json.loads(line) for line in f]
 
-    # If there are job listings with no label then raise a warning and remove
-    # them from the dataset
-    num_no_label = sum(1 for job in job_listings if 'label' not in job)
-    if num_no_label > 0:
-        warnings.warn(f'{num_no_label} job listings have no label and '
-                      f'have been removed from the training data.')
-        job_listings = [job for job in job_listings if 'label' in job]
+    # Convert data to DataFrame
+    df = pd.DataFrame.from_records(job_listings)
+    df = df[['cleaned_text', 'title_or_tasks', 'requirements']]
+    df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements'])
 
-    # Extract the raw features and labels
-    corpus = [job['cleaned_text'] for job in job_listings]
-    labels = [1 if job['label'] == 'Relevant' else 0 for job in job_listings]
+    # Create `labels` column
+    labels = list()
+    for _, row in df.iterrows():
+        if row.title_or_tasks:
+            labels.append(1)
+        elif row.requirements:
+            labels.append(2)
+        else:
+            labels.append(0)
+    df['labels'] = labels
+    df = df.drop(columns=['title_or_tasks', 'requirements'])
 
     # Convert the data to a HuggingFace dataset
-    dataset = Dataset.from_dict(dict(text=corpus, label=labels))
+    dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
+                                     label=df.labels.tolist()))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.8)
@@ -56,7 +62,7 @@ def train_model():
 
     # Tokenize the corpus
     def tokenize(example: dict):
-        return tokenizer(example['text'], truncation=True, max_length=1024)
+        return tokenizer(example['text'], truncation=True, max_length=512)
     train = train.map(tokenize)
     val = val.map(tokenize)
 
@@ -69,11 +75,17 @@ def train_model():
     )
 
     # Load the F1 metric and define the `compute_metrics` function
-    f1 = load_metric('f1')
+    f1_metric = load_metric('f1')
+    precision_metric = load_metric('precision')
+    recall_metric = load_metric('recall')
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
         preds = np.argmax(preds, axis=1)
-        return f1.compute(predictions=preds, references=labels)
+        params = dict(predictions=preds, references=labels)
+        f1 = f1_metric.compute(**params)
+        precision = precision_metric.compute(**params)
+        recall = recall_metric.compute(**params)
+        return dict(f1=f1, precision=precision, recall=recall)
 
     # Initialise the training arguments
     training_args = TrainingArguments(
