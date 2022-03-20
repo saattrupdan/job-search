@@ -4,7 +4,7 @@ from transformers import Trainer
 import torch.nn as nn
 
 
-class MultiLabelTrainer(Trainer)
+class MultiLabelTrainer(Trainer):
     '''HuggingFace Trainer class for multi-label classification'''
     def compute_loss(self, model, inputs, return_outputs: bool = False):
         '''Compute loss for multi-label classification'''
