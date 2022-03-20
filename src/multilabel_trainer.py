@@ -9,7 +9,6 @@ class MultiLabelTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs: bool = False):
         '''Compute loss for multi-label classification'''
         labels = inputs.pop('labels')
-        breakpoint()
         outputs = model(**inputs)
         logits = outputs.logits
         loss_fct = nn.BCEWithLogitsLoss()
