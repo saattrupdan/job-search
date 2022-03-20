@@ -31,13 +31,13 @@ def train_model():
 
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
-    df = df[['cleaned_text', 'bad']]#'title_or_tasks', 'requirements', 'bad']]
-    df = df.explode(['cleaned_text', 'bad'])#'title_or_tasks', 'requirements', 'bad'])
+    df = df[['cleaned_text', 'title_or_tasks', 'requirements']]
+    df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements'])
 
     # Convert the data to a HuggingFace dataset
-    #labels = df[['title_or_tasks', 'requirements', 'bad']].values
+    labels = df[['title_or_tasks', 'requirements', 'bad']].values
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
-                                     label=df.bad.astype(float).tolist()))
+                                     label=labels))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.8)
@@ -59,7 +59,7 @@ def train_model():
     # Initialise the model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
-        num_labels=1,
+        num_labels=3,
         #hidden_dropout_prob=0.5,
         #classifier_dropout=0.5,
     )
@@ -75,7 +75,9 @@ def train_model():
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
         recall = recall_metric.compute(**params)
-        return dict(f1=f1, precision=precision, recall=recall)
+        return dict(f1=list(f1['f1']),
+                    precision=list(precision['precision']),
+                    recall=list(recall['recall']))
 
     # Initialise the training arguments
     training_args = TrainingArguments(
@@ -88,11 +90,11 @@ def train_model():
         evaluation_strategy='steps',
         logging_steps=50,
         eval_steps=50,
-        report_to='none'
+        report_to='none',
     )
 
     # Initialise the trainer
-    trainer = Trainer(
+    trainer = MultiLabelTrainer(
         model=model,
         args=training_args,
         train_dataset=train,
