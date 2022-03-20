@@ -29,6 +29,8 @@ def train_model():
     with data_path.open('r') as f:
         job_listings = [json.loads(line) for line in f]
 
+    breakpoint()
+
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
     df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
@@ -71,7 +73,6 @@ def train_model():
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
         breakpoint()
-        preds = np.argmax(preds, axis=1)
         params = dict(predictions=preds, references=labels, average=None)
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
