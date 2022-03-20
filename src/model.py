@@ -31,13 +31,14 @@ def train_model():
 
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
-    df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
-    df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
+    #df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
+    #df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
+    df = df.bad.explode('bad')
 
     # Convert the data to a HuggingFace dataset
-    labels = df[['title_or_tasks', 'requirements', 'bad']].values
+    #labels = df[['title_or_tasks', 'requirements', 'bad']].values
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
-                                     label=labels))
+                                     label=df.bad.tolist()))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.8)
@@ -91,7 +92,7 @@ def train_model():
     )
 
     # Initialise the trainer
-    trainer = MultiLabelTrainer(
+    trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train,
