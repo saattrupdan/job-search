@@ -44,6 +44,8 @@ def train_model():
     train = splits['train']
     val = splits['test']
 
+    breakpoint()
+
     # Initialize the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_id)
 
@@ -71,7 +73,6 @@ def train_model():
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
         preds = preds.argmax(axis=1)
-        breakpoint()
         params = dict(predictions=preds, references=labels, average=None)
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
