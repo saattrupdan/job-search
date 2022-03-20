@@ -31,7 +31,7 @@ def train_model():
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
     df = df[['cleaned_text', 'title_or_tasks', 'requirements']]
-    df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements'])
+    df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
 
     # Create `labels` column
     labels = list()
@@ -40,10 +40,12 @@ def train_model():
             labels.append(1)
         elif row.requirements:
             labels.append(2)
+        elif row.bad:
+            labels.append(3)
         else:
             labels.append(0)
     df['labels'] = labels
-    df = df.drop(columns=['title_or_tasks', 'requirements'])
+    df = df.drop(columns=['title_or_tasks', 'requirements', 'bad'])
 
     # Convert the data to a HuggingFace dataset
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
@@ -69,7 +71,7 @@ def train_model():
     # Initialise the model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
-        num_labels=3,
+        num_labels=4,
         #hidden_dropout_prob=0.5,
         #classifier_dropout=0.5,
     )
@@ -81,7 +83,7 @@ def train_model():
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
         preds = np.argmax(preds, axis=1)
-        params = dict(predictions=preds, references=labels, average='macro')
+        params = dict(predictions=preds, references=labels, average='none')
         f1 = f1_metric.compute(**params)
         precision = precision_metric.compute(**params)
         recall = recall_metric.compute(**params)
@@ -90,7 +92,7 @@ def train_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=50,
+        num_train_epochs=25,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
