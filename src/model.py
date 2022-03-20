@@ -34,20 +34,6 @@ def train_model():
     df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
     df = df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
 
-    # Create `labels` column
-    labels = list()
-    for _, row in df.iterrows():
-        if row.title_or_tasks:
-            labels.append(1)
-        elif row.requirements:
-            labels.append(2)
-        elif row.bad:
-            labels.append(3)
-        else:
-            labels.append(0)
-    df['labels'] = labels
-    df = df.drop(columns=['title_or_tasks', 'requirements', 'bad'])
-
     # Convert the data to a HuggingFace dataset
     labels = df[['title_or_tasks', 'requirements', 'bad']].values
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
