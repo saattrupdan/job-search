@@ -97,7 +97,7 @@ def train_model():
         learning_rate=2e-5,
         evaluation_strategy='steps',
         logging_steps=50,
-        eval_steps=500,
+        eval_steps=50,
         report_to='none',
     )
 
