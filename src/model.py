@@ -49,8 +49,9 @@ def train_model():
     df = df.drop(columns=['title_or_tasks', 'requirements', 'bad'])
 
     # Convert the data to a HuggingFace dataset
+    labels = df[['title_or_tasks', 'requirements', 'bad']].values
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
-                                     label=df.labels.tolist()))
+                                     label=labels))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.8)
