@@ -188,42 +188,20 @@ def train_relevance_model():
         classifier_dropout=0.5,
     )
 
-    breakpoint()
-
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=10,
+        num_train_epochs=1,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
         learning_rate=2e-5,
         evaluation_strategy='steps',
         logging_steps=10,
-        eval_steps=1,#50,
+        eval_steps=50,
         report_to='none',
         save_total_limit=0,
     )
-
-    def compute_metrics(pred: EvalPrediction) -> dict:
-        '''Computes the metrics for the given predictions'''
-        # Load the metrics
-        f1_metric = load_metric('f1')
-        precision_metric = load_metric('precision')
-        recall_metric = load_metric('recall')
-
-        # Get the predictions and labels
-        preds = pred.predictions > 0
-        preds = preds.astype(float)
-        labels = pred.label_ids.astype(float)
-
-        # Compute the metrics
-        params = dict(predictions=preds, references=labels, average=None)
-        f1 = f1_metric.compute(**params)['f1'][1]
-        precision = precision_metric.compute(**params)['precision'][1]
-        recall = recall_metric.compute(**params)['recall'][1]
-
-        return dict(f1=f1, precision=precision, recall=recall)
 
     # Initialise the trainer
     trainer = ClassWeightTrainer(
@@ -232,12 +210,36 @@ def train_relevance_model():
         train_dataset=train,
         eval_dataset=val,
         data_collator=data_collator,
-        compute_metrics=compute_metrics,
         pos_weight=5,
     )
 
     # Train the model
     trainer.train()
+
+    # Initialise the metrics
+    f1_metric = load_metric('f1')
+    precision_metric = load_metric('precision')
+    recall_metric = load_metric('recall')
+
+    # Get the predictions and labels for the validation set
+    model.cpu()
+    model.eval()
+    inputs = data_collator(val.remove_columns(['text'])[:])
+    labels = inputs.labels
+    inputs.pop('labels')
+    preds = model(**inputs).logits > 0
+
+    # Compute the metrics
+    params = dict(predictions=preds, references=labels, average=None)
+    f1 = f1_metric.compute(**params)['f1'][1]
+    precision = precision_metric.compute(**params)['precision'][1]
+    recall = recall_metric.compute(**params)['recall'][1]
+
+    # Print the results
+    print(f'\n*** Scores for {task} ***')
+    print(f'F1-score: {100 * f1:.2f}')
+    print(f'Precision: {100 * precision:.2f}')
+    print(f'Recall: {100 * recall:.2f}')
 
     # Save the model
     model_dir = Path('models')
