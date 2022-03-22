@@ -190,8 +190,7 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        max_steps=1,
-        #num_train_epochs=10,
+        num_train_epochs=10,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
