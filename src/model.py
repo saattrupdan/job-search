@@ -1,10 +1,11 @@
 '''Model that detects whether a job listing is relevant or not'''
 
-from datasets import Dataset, load_metric
+from datasets import Dataset
 from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification,
                           TrainingArguments)
+import torchmetrics as tm
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -190,7 +191,8 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=10,
+        #num_train_epochs=10,
+        max_steps=1,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -216,9 +218,9 @@ def train_relevance_model():
     trainer.train()
 
     # Initialise the metrics
-    f1_metric = load_metric('f1')
-    precision_metric = load_metric('precision')
-    recall_metric = load_metric('recall')
+    f1_metric = tm.F1Score(average=None)
+    precision_metric = tm.Precision(average=None)
+    recall_metric = tm.Recall(average=None)
 
     # Get the predictions and labels for the validation set
     model.cpu().eval()
@@ -235,10 +237,11 @@ def train_relevance_model():
     all_preds = np.array(all_preds)
 
     # Compute the metrics
+    breakpoint()
     params = dict(predictions=all_preds, references=all_labels, average=None)
-    f1 = f1_metric.compute(**params)['f1'][1]
-    precision = precision_metric.compute(**params)['precision'][1]
-    recall = recall_metric.compute(**params)['recall'][1]
+    f1 = f1_metric(**params)['f1'][1]
+    precision = precision_metric(**params)['precision'][1]
+    recall = recall_metric(**params)['recall'][1]
 
     # Print the results
     print(f'\n*** Scores ***')
