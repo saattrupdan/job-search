@@ -73,8 +73,7 @@ def train_filtering_model():
     training_args = TrainingArguments(
         output_dir='models/filtering_model',
         hub_model_id='saattrupdan/job-listing-filtering-model',
-        max_steps=1,
-        #num_train_epochs=25,
+        num_train_epochs=25,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -130,8 +129,6 @@ def train_filtering_model():
         print(f'F1-score: {100 * f1:.2f}')
         print(f'Precision: {100 * precision:.2f}')
         print(f'Recall: {100 * recall:.2f}')
-
-    breakpoint()
 
     # Save the model
     model.save_pretrained()
@@ -238,7 +235,7 @@ def train_relevance_model():
     trainer.train()
 
     # Initialise the metrics
-    params = dict(average='none', num_classes=2)
+    params = dict(average='none', num_classes=2, multiclass=True)
     f2_metric = tm.FBetaScore(beta=2, **params)
     precision_metric = tm.Precision(**params)
     recall_metric = tm.Recall(**params)
