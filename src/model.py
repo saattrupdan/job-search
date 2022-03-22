@@ -94,9 +94,10 @@ def train_filtering_model():
     recall_metric = load_metric('recall')
 
     # Get the predictions and labels for the validation set
-    output = trainer.predict(val)
-    preds = output.predictions > 0
-    labels = output.label_ids
+    inputs = data_collator(val.remove_columns(['text'])[:])
+    labels = inputs.labels
+    inputs.pop('labels')
+    preds = model(**inputs).logits > 0
 
     breakpoint()
 
