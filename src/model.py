@@ -107,7 +107,7 @@ def train_filtering_model():
 
     # Get the predictions and labels for the validation set
     model.cpu().eval()
-    all_labels = torch.zeros(len(val), 2)
+    all_labels = torch.zeros(len(val), 2).long()
     all_preds = torch.zeros(len(val), 2)
     for idx in range(len(val)):
         inputs = data_collator(val.remove_columns(['text'])[idx:idx+1])
