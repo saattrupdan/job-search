@@ -197,7 +197,7 @@ def train_relevance_model():
         # Get the predictions and labels
         preds = pred.predictions > 0
         preds = preds.astype(float)
-        labels = pred.label_ids.float()
+        labels = pred.label_ids.astype(float)
 
         # Compute the metrics
         params = dict(predictions=preds, references=labels, average=None)
