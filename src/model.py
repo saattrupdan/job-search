@@ -191,7 +191,7 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=1,
+        num_train_epochs=10,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -236,7 +236,7 @@ def train_relevance_model():
     recall = recall_metric.compute(**params)['recall'][1]
 
     # Print the results
-    print(f'\n*** Scores for {task} ***')
+    print(f'\n*** Scores ***')
     print(f'F1-score: {100 * f1:.2f}')
     print(f'Precision: {100 * precision:.2f}')
     print(f'Recall: {100 * recall:.2f}')
