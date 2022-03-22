@@ -4,11 +4,10 @@ from datasets import Dataset, load_metric
 from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification,
-                          TrainingArguments,
-                          EvalPrediction)
-
+                          TrainingArguments)
 from pathlib import Path
 import pandas as pd
+import numpy as np
 import json
 import os
 from trainers import MultiLabelTrainer, ClassWeightTrainer
