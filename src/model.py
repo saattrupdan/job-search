@@ -65,7 +65,7 @@ def train_filtering_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=1,#25,
+        num_train_epochs=25,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -104,7 +104,6 @@ def train_filtering_model():
     # Evaluate the model
     for idx, task in enumerate(['title_or_tasks', 'requirements']):
 
-        breakpoint()
         params = dict(predictions=preds[:, idx],
                       references=labels[:, idx],
                       average=None)
@@ -172,7 +171,7 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=1,#25,
+        num_train_epochs=25,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
