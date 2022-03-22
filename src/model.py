@@ -94,6 +94,8 @@ def train_filtering_model():
     recall_metric = load_metric('recall')
 
     # Get the predictions and labels for the validation set
+    model.cpu()
+    model.eval()
     inputs = data_collator(val.remove_columns(['text'])[:])
     labels = inputs.labels
     inputs.pop('labels')
