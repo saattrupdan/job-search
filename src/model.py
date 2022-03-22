@@ -182,8 +182,8 @@ def train_relevance_model():
         gradient_accumulation_steps=4,
         learning_rate=2e-5,
         evaluation_strategy='steps',
-        logging_steps=50,
-        eval_steps=50,
+        logging_steps=5,
+        eval_steps=5,
         report_to='none',
     )
 
