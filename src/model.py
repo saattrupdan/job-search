@@ -111,9 +111,9 @@ def train_model():
 
         # Print the results
         print(f'\n\n*** Scores for {task} ***')
-        print(f'F1-score: {f1:.4f}')
-        print(f'Precision: {precision:.4f}')
-        print(f'Recall: {recall:.4f}')
+        print(f'F1-score: {100 * f1:.2f}')
+        print(f'Precision: {100 * precision:.2f}')
+        print(f'Recall: {100 * recall:.2f}')
 
 
 if __name__ == '__main__':
