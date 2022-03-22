@@ -31,7 +31,7 @@ class ClassWeightTrainer(Trainer):
         logits = outputs.logits
         weights = torch.tensor([
             self.pos_weight if lbl == 1 else 1 for lbl in labels
-        ]).float()
+        ]).float().to(logits.device)
         loss_fct = nn.BCEWithLogitsLoss(weight=weights)
         loss = loss_fct(logits.view(-1), labels.float().view(-1))
         return (loss, logits) if return_outputs else loss
