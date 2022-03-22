@@ -223,12 +223,17 @@ def train_relevance_model():
     recall_metric = load_metric('recall')
 
     # Get the predictions and labels for the validation set
-    model.cpu()
-    model.eval()
-    inputs = data_collator(val.remove_columns(['text'])[:])
-    labels = inputs.labels
-    inputs.pop('labels')
-    preds = model(**inputs).logits > 0
+    model.cpu().eval()
+    all_labels = list()
+    all_preds = list()
+    for idx in len(val):
+        inputs = data_collator(val.remove_columns(['text'])[idx])
+        labels = inputs.labels
+        inputs.pop('labels')
+        preds = model(**inputs).logits > 0
+        breakpoint()
+        all_labels.extend(list(labels))
+        all_preds.extend(list(preds))
 
     # Compute the metrics
     params = dict(predictions=preds, references=labels, average=None)
