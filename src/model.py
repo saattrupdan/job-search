@@ -233,9 +233,11 @@ def train_relevance_model():
         preds = model(**inputs).logits[0] > 0
         all_labels.extend(list(labels))
         all_preds.extend(list(preds))
+    all_labels = np.array(all_labels)
+    all_preds = np.array(all_preds)
 
     # Compute the metrics
-    params = dict(predictions=preds, references=labels, average=None)
+    params = dict(predictions=all_preds, references=all_labels, average=None)
     f1 = f1_metric.compute(**params)
     precision = precision_metric.compute(**params)
     recall = recall_metric.compute(**params)
