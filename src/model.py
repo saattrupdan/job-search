@@ -247,10 +247,9 @@ def train_relevance_model():
 
     # Compute the metrics
     args = [torch.tensor(all_preds), torch.LongTensor(all_labels)]
-    kwargs = dict(average=None)
-    f2 = f2_metric(*args, **kwargs)[1].item()
-    precision = precision_metric(*args, **kwargs)[1].item()
-    recall = recall_metric(*args, **kwargs)[1].item()
+    f2 = f2_metric(*args)[1].item()
+    precision = precision_metric(*args)[1].item()
+    recall = recall_metric(*args)[1].item()
 
     # Print the results
     print(f'\n*** Scores ***')
