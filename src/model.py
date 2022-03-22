@@ -227,11 +227,10 @@ def train_relevance_model():
     all_labels = list()
     all_preds = list()
     for idx in range(len(val)):
-        inputs = data_collator(val.remove_columns(['text'])[idx])
+        inputs = data_collator(val.remove_columns(['text'])[idx:idx+1])
         labels = inputs.labels
         inputs.pop('labels')
-        breakpoint()
-        preds = model(**inputs.unsqueeze(0)).logits[0] > 0
+        preds = model(**inputs).logits[0] > 0
         all_labels.extend(list(labels))
         all_preds.extend(list(preds))
 
