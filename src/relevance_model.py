@@ -41,7 +41,7 @@ def train_relevance_model():
 
     # Add more data
     dfs = list()
-    shuffle_join_fn = lambda x: ' '.join(random.sample(x, len(x)))
+    shuffle_join_fn = lambda x: ' '.join(random.sample(list(x), len(x)))
     for i in range(100):
         extra_df = (df.sample(frac=0.5, replace=False, random_state=i)
                       .groupby('url')
