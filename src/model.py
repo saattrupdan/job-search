@@ -195,8 +195,8 @@ def train_relevance_model():
         recall_metric = load_metric('recall')
 
         # Get the predictions and labels
-        preds = pred.predictions > 0
-        labels = pred.label_ids
+        preds = pred.predictions.ge(0).float()
+        labels = pred.label_ids.float()
 
         # Compute the metrics
         params = dict(predictions=preds, references=labels, average=None)
