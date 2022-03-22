@@ -218,9 +218,10 @@ def train_relevance_model():
     trainer.train()
 
     # Initialise the metrics
-    f2_metric = tm.FBetaScore(beta=2, average='none')
-    precision_metric = tm.Precision(average='none')
-    recall_metric = tm.Recall(average='none')
+    params = dict(average='none', num_classes=2)
+    f2_metric = tm.FBetaScore(beta=2, **params)
+    precision_metric = tm.Precision(**params)
+    recall_metric = tm.Recall(**params)
 
     # Get the predictions and labels for the validation set
     model.cpu().eval()
