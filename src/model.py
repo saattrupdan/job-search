@@ -7,6 +7,7 @@ from transformers import (AutoTokenizer,
                           TrainingArguments)
 import torchmetrics as tm
 from pathlib import Path
+import torch
 import pandas as pd
 import numpy as np
 import json
@@ -238,11 +239,12 @@ def train_relevance_model():
     all_preds = np.array(all_preds)
 
     # Compute the metrics
-    breakpoint()
-    params = dict(predictions=all_preds, references=all_labels, average=None)
-    f2 = f2_metric(**params)['f2'][1]
-    precision = precision_metric(**params)['precision'][1]
-    recall = recall_metric(**params)['recall'][1]
+    params = dict(predictions=torch.tensor(all_preds),
+                  references=torch.LongTensor(all_labels),
+                  average=None)
+    f2 = f2_metric(**params)[1].item()
+    precision = precision_metric(**params)[1].item()
+    recall = recall_metric(**params)[1].item()
 
     # Print the results
     print(f'\n*** Scores ***')
