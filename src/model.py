@@ -5,7 +5,7 @@ from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification,
                           TrainingArguments)
-import torchmetrics as tm
+from torchmetrics import FBetaScore, Precision, Recall
 from pathlib import Path
 import pandas as pd
 import numpy as np
