@@ -188,6 +188,8 @@ def train_relevance_model():
         classifier_dropout=0.5,
     )
 
+    breakpoint()
+
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
@@ -198,15 +200,13 @@ def train_relevance_model():
         learning_rate=2e-5,
         evaluation_strategy='steps',
         logging_steps=10,
-        eval_steps=50,
+        eval_steps=1,#50,
         report_to='none',
         save_total_limit=0,
     )
 
     def compute_metrics(pred: EvalPrediction) -> dict:
         '''Computes the metrics for the given predictions'''
-
-        breakpoint()
         # Load the metrics
         f1_metric = load_metric('f1')
         precision_metric = load_metric('precision')
