@@ -207,8 +207,7 @@ def train_relevance_model():
     training_args = TrainingArguments(
         output_dir='models/relevance_model',
         hub_model_id='saattrupdan/job-listing-relevance-model',
-        #num_train_epochs=10,
-        max_steps=1,
+        num_train_epochs=10,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -263,8 +262,6 @@ def train_relevance_model():
     print(f'Precision: {100 * precision:.2f}')
     print(f'Recall: {100 * recall:.2f}')
 
-    breakpoint()
-
     # Save the model
     model.save_pretrained()
 
@@ -273,5 +270,5 @@ def train_relevance_model():
 
 
 if __name__ == '__main__':
-    #train_filtering_model()
+    train_filtering_model()
     train_relevance_model()
