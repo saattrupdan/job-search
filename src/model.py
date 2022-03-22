@@ -168,7 +168,7 @@ def train_relevance_model():
     # Initialise the model
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
-        num_labels=2,
+        num_labels=1,
         hidden_dropout_prob=0.1,
         classifier_dropout=0.5,
     )
