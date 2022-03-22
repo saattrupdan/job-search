@@ -101,16 +101,14 @@ def train_filtering_model():
     inputs.pop('labels')
     preds = model(**inputs).logits > 0
 
-    breakpoint()
-
     # Evaluate the model
     for idx, task in enumerate(['title_or_tasks', 'requirements']):
         params = dict(predictions=preds[:, idx],
                       references=labels[:, idx],
                       average=None)
-        f1 = f1_metric.compute(**params)['f1']
-        precision = precision_metric.compute(**params)['precision']
-        recall = recall_metric.compute(**params)['recall']
+        f1 = f1_metric.compute(**params)['f1'][1]
+        precision = precision_metric.compute(**params)['precision'][1]
+        recall = recall_metric.compute(**params)['recall'][1]
 
         # Print the results
         print(f'\n\n*** Scores for {task} ***')
