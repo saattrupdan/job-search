@@ -104,6 +104,8 @@ def train_model():
     # Train the model
     trainer.train()
 
+    breakpoint()
+
 
 if __name__ == '__main__':
     train_model()
