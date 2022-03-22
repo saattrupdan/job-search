@@ -23,8 +23,8 @@ class EmailBot:
         content = ('Hiiii, it\'s me again!\n\n'
                    'Here are the latest job listings:\n\n')
         for idx, job_listing in enumerate(job_listings):
-            content += f'{idx}. {job_listing["url"]}\n\n'
-        content += '\n\nCheerio,\nYour Favorite Job Bot x'
+            content += f'    {1 + idx}. {job_listing["url"]}\n'
+        content += '\nCheerio,\nYour fav job bot x'
         self.send_email(subject=subject, content=content, to=to)
 
     def send_email(self, subject: str, content: str, to: str):
