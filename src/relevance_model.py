@@ -12,6 +12,7 @@ import pandas as pd
 import json
 import os
 from trainers import ClassWeightTrainer
+import random
 
 
 def train_relevance_model():
@@ -35,12 +36,16 @@ def train_relevance_model():
             .query('title_or_tasks or requirements')
             .drop(columns=['title_or_tasks', 'requirements']))
 
+    # Lower case the cleaned text
+    df['cleaned_text'] = df.cleaned_text.str.lower()
+
     # Add more data
     dfs = list()
+    shuffle_join_fn = lambda x: ' '.join(random.sample(x, len(x)))
     for i in range(100):
         extra_df = (df.sample(frac=0.5, replace=False, random_state=i)
                       .groupby('url')
-                      .agg(dict(cleaned_text=lambda x: '\n'.join(x),
+                      .agg(dict(cleaned_text=shuffle_join_fn,
                                 bad=lambda x: any(x))))
         dfs.append(extra_df)
     df = pd.concat(dfs)

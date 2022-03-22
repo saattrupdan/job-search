@@ -71,7 +71,8 @@ def main():
     new_job_listings = [
         dict(url='https://www.google.com',
              cleaned_text='This is a test job\n'
-                           'You need to have 10+ years of experience'),
+                           'You need to have 10+ years of experience in a '
+                           'pharmaceutical company'),
         dict(url='https://www.notgoogle.com',
              cleaned_text='This is another test job\n'
                            'You will be working with GC-MS'),
@@ -94,7 +95,8 @@ def main():
     mask = np.logical_or(mask[:, 0], mask[:, 1])
     df = (df.loc[mask]
             .groupby('url')
-            .agg(dict(cleaned_text=lambda x: '\n'.join(x))))
+            .agg(dict(cleaned_text=lambda x: ' '.join(x))))
+    df['cleaned_text'] = df.cleaned_text.str.lower()
 
     logger.info(f'Found {int(mask.sum()):,} relevant paragraphs out '
                 f'of {mask.shape[0]:,}.')
