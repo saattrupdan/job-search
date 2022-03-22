@@ -226,7 +226,7 @@ def train_relevance_model():
     model.cpu().eval()
     all_labels = list()
     all_preds = list()
-    for idx in len(val):
+    for idx in range(len(val)):
         inputs = data_collator(val.remove_columns(['text'])[idx])
         labels = inputs.labels
         inputs.pop('labels')
