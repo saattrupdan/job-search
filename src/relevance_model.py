@@ -57,6 +57,9 @@ def train_relevance_model():
 
     # Initialize the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer.save_pretrained('models/relevance_model')
+
+    breakpoint()
 
     # Initialise the data collator
     data_collator = DataCollatorWithPadding(tokenizer)

@@ -45,6 +45,9 @@ def train_filtering_model():
 
     # Initialize the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer.save_pretrained('models/filtering_model')
+
+    breakpoint()
 
     # Initialise the data collator
     data_collator = DataCollatorWithPadding(tokenizer)
