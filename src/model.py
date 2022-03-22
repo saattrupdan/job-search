@@ -113,7 +113,7 @@ def train_filtering_model():
         recall = recall_metric.compute(**params)['recall'][1]
 
         # Print the results
-        print(f'\n\n*** Scores for {task} ***')
+        print(f'\n*** Scores for {task} ***')
         print(f'F1-score: {100 * f1:.2f}')
         print(f'Precision: {100 * precision:.2f}')
         print(f'Recall: {100 * recall:.2f}')
