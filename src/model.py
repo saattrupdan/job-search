@@ -138,7 +138,7 @@ def train_relevance_model():
     df = pd.DataFrame.from_records(job_listings)
     df = df[['url', 'cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
     df = (df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
-            .query('title_or_tasks or requirements')[[
+            .query('title_or_tasks or requirements')
             .drop(columns=['title_or_tasks', 'requirements'])
             .groupby('url')
             .agg(dict(cleaned_text=lambda x: ' '.join(x),
