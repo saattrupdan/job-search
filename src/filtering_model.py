@@ -43,11 +43,14 @@ def train_filtering_model():
     train = splits['train']
     val = splits['test']
 
+    # Create the model directory if it doesn't exist
+    model_dir = Path('models')
+    if not model_dir.exists():
+        model_dir.mkdir()
+
     # Initialize the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_id)
-    tokenizer.save_pretrained('models/filtering_model')
-
-    breakpoint()
+    tokenizer.save_pretrained(str(model_dir / 'filtering_model'))
 
     # Initialise the data collator
     data_collator = DataCollatorWithPadding(tokenizer)
@@ -65,11 +68,6 @@ def train_filtering_model():
         hidden_dropout_prob=0.1,
         classifier_dropout=0.5,
     )
-
-    # Create the model directory if it doesn't exist
-    model_dir = Path('models')
-    if not model_dir.exists():
-        model_dir.mkdir()
 
     # Initialise the training arguments
     training_args = TrainingArguments(
