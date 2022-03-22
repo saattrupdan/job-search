@@ -192,7 +192,7 @@ def train_relevance_model():
     training_args = TrainingArguments(
         output_dir='.',
         #num_train_epochs=10,
-        max_steps=10,
+        max_steps=1,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -231,7 +231,7 @@ def train_relevance_model():
         labels = inputs.labels
         inputs.pop('labels')
         breakpoint()
-        preds = model(**inputs).logits > 0
+        preds = model(**inputs.unsqueeze(0)).logits[0] > 0
         all_labels.extend(list(labels))
         all_preds.extend(list(preds))
 
