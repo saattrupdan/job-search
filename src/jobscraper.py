@@ -176,7 +176,6 @@ if __name__ == '__main__':
     # Send the new job listings by email
     email_bot.send_job_listings(new_job_listings,
                                 to='saattrupdan@gmail.com')
-    breakpoint()
     email_bot.send_job_listings(new_job_listings,
                                 to='amy.smart1@btinternet.com')
 
