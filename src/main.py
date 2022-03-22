@@ -28,10 +28,10 @@ def main():
 
     # Load filtering and relevance models
     filtering_model = AutoModelForSequenceClassification.from_pretrained(
-        './models/filtering_model'
+        'saattrupdan/job-listing-filtering-model'
     ).cpu().eval()
     relevance_model = AutoModelForSequenceClassification.from_pretrained(
-        './models/relevance_model'
+        'saattrupdan/job-listing-relevance-model'
     ).cpu().eval()
 
     # Initialise data collators
