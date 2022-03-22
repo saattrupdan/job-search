@@ -54,7 +54,9 @@ def main():
     relevance_data_collator = DataCollatorWithPadding(relevance_tok)
 
     # Update file with job listings
-    new_job_listings = job_scraper.scrape_jobs()
+    #new_job_listings = job_scraper.scrape_jobs()
+    new_job_listings = [dict(url='https://www.google.com',
+                             cleaned_text='This is a test job')]
 
     breakpoint()
 
