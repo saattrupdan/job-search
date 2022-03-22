@@ -11,6 +11,7 @@ from jobindex import JobIndex
 from dtu import DTU
 from thehub import TheHub
 from ku import KU
+from emailbot import EmailBot
 
 
 # Enable tqdm with pandas
@@ -163,13 +164,21 @@ if __name__ == '__main__':
         'gas analysis'
     ]
 
+    # Create email bot
+    email_bot = EmailBot()
+
     # Create job scraper
     job_scraper = JobScraper(queries=queries)
-                             #overwrite=True,
-                             #num_pages=10)
 
     # Update file with job listings
-    job_scraper.scrape_jobs()
+    new_job_listings = job_scraper.scrape_jobs()
+
+    # Send the new job listings by email
+    email_bot.send_job_listings(new_job_listings,
+                                to='saattrupdan@gmail.com')
+    breakpoint()
+    email_bot.send_job_listings(new_job_listings,
+                                to='amy.smart1@btinternet.com')
 
     # Close the job_scraper
     job_scraper.close()
