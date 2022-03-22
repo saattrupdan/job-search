@@ -1,6 +1,7 @@
 '''Automatic sending of emails with newest job listings'''
 
 import yagmail
+import random
 from typing import List
 
 
@@ -9,6 +10,45 @@ class EmailBot:
 
     def __init__(self):
         self.email = yagmail.SMTP('amysjobbot')
+
+    def _random_greeting(self) -> str:
+        '''Generate a random greeting.
+
+        Returns:
+            str:
+                Random greeting.
+        '''
+        greetings = ['Hi',
+                     'Hello',
+                     'Hey',
+                     'Howdy',
+                     'Hiya',
+                     'Sup',
+                     'Yo',
+                     'Hiiiiii',
+                     'Hej',
+                     'Dav',
+                     'Davs',
+                     'Halløj',
+                     'Halløjsa']
+        return random.choice(greetings)
+
+    def _random_farewell(self) -> str:
+        '''Generate a random farewell.
+
+        Returns:
+            str:
+                Random farewell.
+        '''
+        farewells = ['Bye',
+                     'Cheerio',
+                     'See ya',
+                     'Later',
+                     'Farvel',
+                     'Farveller',
+                     'Vi ses',
+                     'Hej hej']
+        return random.choice(farewells)
 
     def send_job_listings(self, job_listings: List[dict], to: str):
         '''Send job listings an email.
@@ -20,11 +60,11 @@ class EmailBot:
                 Email address to send to.
         '''
         subject = '[YourFavoriteJobBot] New Job Listings'
-        content = ('Hiiii, it\'s me again!\n\n'
+        content = (f'{self._random_greeting()}, it\'s me again!\n\n'
                    'Here are the latest job listings:\n\n')
         for idx, job_listing in enumerate(job_listings):
             content += f'    {1 + idx}. {job_listing["url"]}\n'
-        content += '\nCheerio,\nYour fav job bot x'
+        content += f'\n{self._random_farewell()},\nYour fav job bot x'
         self.send_email(subject=subject, content=content, to=to)
 
     def send_email(self, subject: str, content: str, to: str):
@@ -40,9 +80,3 @@ class EmailBot:
         '''
         # receiver = 'amy.smart1@btinternet.com'
         self.email.send(to=to, subject=subject, contents=content)
-
-
-if __name__ == '__main__':
-    content = ('Dear Amy,\n\nThis is a test email. Wowza.\n\n'
-               'Best,\n Your favorite job bot')
-    send_email(subject='Look at this cool email', content=content)
