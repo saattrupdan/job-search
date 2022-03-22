@@ -103,6 +103,8 @@ def train_filtering_model():
 
     # Evaluate the model
     for idx, task in enumerate(['title_or_tasks', 'requirements']):
+
+        breakpoint()
         params = dict(predictions=preds[:, idx],
                       references=labels[:, idx],
                       average=None)
