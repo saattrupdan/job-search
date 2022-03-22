@@ -38,8 +38,7 @@ def main():
     email_bot = EmailBot()
 
     # Load filtering and relevance tokenizers
-    filtering_tok = AutoTokenizer.from_pretrained('./models/filtering_model')
-    relevance_tok = AutoTokenizer.from_pretrained('./models/relevance_model')
+    tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
 
     # Load filtering and relevance models
     filtering_model = AutoModelForSequenceClassification.from_pretrained(
@@ -50,8 +49,7 @@ def main():
     ).cpu().eval()
 
     # Initialise data collators
-    filtering_data_collator = DataCollatorWithPadding(filtering_tok)
-    relevance_data_collator = DataCollatorWithPadding(relevance_tok)
+    data_collator = DataCollatorWithPadding(tokenizer)
 
     # Update file with job listings
     #new_job_listings = job_scraper.scrape_jobs()
@@ -66,8 +64,8 @@ def main():
     df = df.explode('cleaned_text').reset_index(drop=True)
 
     # Use the filtering model to filter out irrelevant paragraphs
-    paragraphs = filtering_data_collator([
-        filtering_tok(p, truncation=True, max_length=512)
+    paragraphs = data_collator([
+        tokenizer(p, truncation=True, max_length=512)
         for p in df.cleaned_text
     ])
     mask = (filtering_model(**paragraphs).logits > 0).numpy()
@@ -77,8 +75,8 @@ def main():
 
     # Use the relevance model on the resulting filtered job listings to arrive
     # at the relevant ones
-    filtered_job_listings = relevance_data_collator([
-        relevance_tok(listing, truncation=True, max_length=512)
+    filtered_job_listings = data_collator([
+        tokenizer(listing, truncation=True, max_length=512)
         for listing in df.cleaned_text
     ])
     mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
