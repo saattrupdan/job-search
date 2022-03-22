@@ -67,6 +67,7 @@ def train_filtering_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
+        hub_model_id='saattrupdan/job-listing-filtering-model',
         num_train_epochs=25,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
@@ -77,6 +78,7 @@ def train_filtering_model():
         eval_steps=50,
         report_to='none',
         save_total_limit=0,
+        push_to_hub=True,
     )
 
     # Initialise the trainer
@@ -126,6 +128,9 @@ def train_filtering_model():
         model_dir.mkdir()
     model_path = model_dir / 'filtering_model'
     model.save_pretrained(str(model_path))
+
+    # Push to hub
+    trainer.push_to_hub()
 
 
 def train_relevance_model():
@@ -192,6 +197,7 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
+        hub_model_id='saattrupdan/job-listing-relevance-model',
         #num_train_epochs=10,
         max_steps=1,
         per_device_train_batch_size=8,
@@ -203,6 +209,7 @@ def train_relevance_model():
         eval_steps=50,
         report_to='none',
         save_total_limit=0,
+        push_to_hub=True,
     )
 
     # Initialise the trainer
@@ -257,6 +264,9 @@ def train_relevance_model():
         model_dir.mkdir()
     model_path = model_dir / 'relevance_model'
     model.save_pretrained(str(model_path))
+
+    # Push to hub
+    trainer.push_to_hub()
 
 
 if __name__ == '__main__':
