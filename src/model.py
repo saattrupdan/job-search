@@ -110,11 +110,10 @@ def train_filtering_model():
     all_labels = torch.zeros(len(val), 2)
     all_preds = torch.zeros(len(val), 2)
     for idx in range(len(val)):
-        breakpoint()
         inputs = data_collator(val.remove_columns(['text'])[idx:idx+1])
+        all_labels[idx] = inputs.labels
         inputs.pop('labels')
         preds = model(**inputs).logits > 0
-        all_labels[idx] = inputs.labels
         all_preds[idx] = preds
 
     # Evaluate the model
