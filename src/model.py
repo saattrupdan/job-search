@@ -236,9 +236,9 @@ def train_relevance_model():
 
     # Compute the metrics
     params = dict(predictions=all_preds, references=all_labels, average=None)
-    f1 = f1_metric.compute(**params)['f1']
-    precision = precision_metric.compute(**params)['precision']
-    recall = recall_metric.compute(**params)['recall']
+    f1 = f1_metric.compute(**params)['f1'][1]
+    precision = precision_metric.compute(**params)['precision'][1]
+    recall = recall_metric.compute(**params)['recall'][1]
 
     # Print the results
     print(f'\n*** Scores ***')
