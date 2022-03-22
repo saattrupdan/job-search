@@ -64,9 +64,14 @@ def train_filtering_model():
         classifier_dropout=0.5,
     )
 
+    # Create the model directory if it doesn't exist
+    model_dir = Path('models')
+    if not model_dir.exists():
+        model_dir.mkdir()
+
     # Initialise the training arguments
     training_args = TrainingArguments(
-        output_dir='.',
+        output_dir='models/filtering_model',
         hub_model_id='saattrupdan/job-listing-filtering-model',
         num_train_epochs=25,
         per_device_train_batch_size=8,
@@ -94,27 +99,33 @@ def train_filtering_model():
     trainer.train()
 
     # Initialise the metrics
-    f1_metric = load_metric('f1')
-    precision_metric = load_metric('precision')
-    recall_metric = load_metric('recall')
+    params = dict(average='none', num_classes=2)
+    f1_metric = tm.FBetaScore(beta=1, **params)
+    precision_metric = tm.Precision(**params)
+    recall_metric = tm.Recall(**params)
 
     # Get the predictions and labels for the validation set
-    model.cpu()
-    model.eval()
-    inputs = data_collator(val.remove_columns(['text'])[:])
-    labels = inputs.labels
-    inputs.pop('labels')
-    preds = model(**inputs).logits > 0
+    model.cpu().eval()
+    all_labels = list()
+    all_preds = list()
+    for idx in range(len(val)):
+        inputs = data_collator(val.remove_columns(['text'])[idx:idx+1])
+        labels = inputs.labels
+        inputs.pop('labels')
+        preds = model(**inputs).logits[0] > 0
+        all_labels.extend(list(labels))
+        all_preds.extend(list(preds))
+    all_labels = torch.tensor(all_labels)
+    all_preds = torch.LongTensor(all_preds)
 
     # Evaluate the model
     for idx, task in enumerate(['title_or_tasks', 'requirements']):
 
-        params = dict(predictions=preds[:, idx],
-                      references=labels[:, idx],
-                      average=None)
-        f1 = f1_metric.compute(**params)['f1'][1]
-        precision = precision_metric.compute(**params)['precision'][1]
-        recall = recall_metric.compute(**params)['recall'][1]
+        # Compute the metrics
+        args = [all_preds[:, idx], all_labels[:, idx]]
+        f1 = f1_metric(*args)[1].item()
+        precision = precision_metric(*args)[1].item()
+        recall = recall_metric(*args)[1].item()
 
         # Print the results
         print(f'\n*** Scores for {task} ***')
@@ -123,11 +134,7 @@ def train_filtering_model():
         print(f'Recall: {100 * recall:.2f}')
 
     # Save the model
-    model_dir = Path('models')
-    if not model_dir.exists():
-        model_dir.mkdir()
-    model_path = model_dir / 'filtering_model'
-    model.save_pretrained(str(model_path))
+    model.save_pretrained()
 
     # Push to hub
     trainer.push_to_hub()
@@ -194,9 +201,14 @@ def train_relevance_model():
         classifier_dropout=0.5,
     )
 
+    # Create the model directory if it doesn't exist
+    model_dir = Path('models')
+    if not model_dir.exists():
+        model_dir.mkdir()
+
     # Initialise the training arguments
     training_args = TrainingArguments(
-        output_dir='.',
+        output_dir='models/relevance_model',
         hub_model_id='saattrupdan/job-listing-relevance-model',
         #num_train_epochs=10,
         max_steps=1,
@@ -260,11 +272,7 @@ def train_relevance_model():
     breakpoint()
 
     # Save the model
-    model_dir = Path('models')
-    if not model_dir.exists():
-        model_dir.mkdir()
-    model_path = model_dir / 'relevance_model'
-    model.save_pretrained(str(model_path))
+    model.save_pretrained()
 
     # Push to hub
     trainer.push_to_hub()
