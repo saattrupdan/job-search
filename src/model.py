@@ -130,9 +130,6 @@ def train_filtering_model():
         print(f'Precision: {100 * precision:.2f}')
         print(f'Recall: {100 * recall:.2f}')
 
-    # Save the model
-    model.save_pretrained()
-
     # Push to hub
     trainer.push_to_hub()
 
@@ -261,9 +258,6 @@ def train_relevance_model():
     print(f'F2-score: {100 * f2:.2f}')
     print(f'Precision: {100 * precision:.2f}')
     print(f'Recall: {100 * recall:.2f}')
-
-    # Save the model
-    model.save_pretrained()
 
     # Push to hub
     trainer.push_to_hub()
