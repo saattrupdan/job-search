@@ -192,7 +192,8 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=10,
+        #num_train_epochs=10,
+        max_steps=1,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
@@ -238,12 +239,12 @@ def train_relevance_model():
     all_preds = np.array(all_preds)
 
     # Compute the metrics
-    params = dict(predictions=torch.tensor(all_preds),
-                  references=torch.LongTensor(all_labels),
-                  average=None)
-    f2 = f2_metric(**params)[1].item()
-    precision = precision_metric(**params)[1].item()
-    recall = recall_metric(**params)[1].item()
+    args = [predictions=torch.tensor(all_preds),
+            references=torch.LongTensor(all_labels)]
+    kwargs = dict(average=None)
+    f2 = f2_metric(*args, **kwargs)[1].item()
+    precision = precision_metric(*args, **kwargs)[1].item()
+    recall = recall_metric(*args, **kwargs)[1].item()
 
     # Print the results
     print(f'\n*** Scores ***')
