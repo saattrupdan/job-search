@@ -63,20 +63,6 @@ def train_model():
         classifier_dropout=0.5,
     )
 
-    # Load the F1 metric and define the `compute_metrics` function
-    f1_metric = load_metric('f1')
-    precision_metric = load_metric('precision')
-    recall_metric = load_metric('recall')
-    def compute_metrics(eval_pred):
-        preds, labels = eval_pred
-        params = dict(predictions=preds, references=labels, average=None)
-        f1 = f1_metric.compute(**params)
-        precision = precision_metric.compute(**params)
-        recall = recall_metric.compute(**params)
-        return dict(f1=list(f1['f1']),
-                    precision=list(precision['precision']),
-                    recall=list(recall['recall']))
-
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
@@ -103,6 +89,28 @@ def train_model():
 
     # Train the model
     trainer.train()
+
+    # Initialise the metrics
+    f1_metric = load_metric('f1')
+    precision_metric = load_metric('precision')
+    recall_metric = load_metric('recall')
+
+    # Get the predictions and labels for the validation set
+    output = trainer.predict(val)
+    preds = output.predictions > 0
+    labels = output.label_ids
+
+    # Evaluate the model
+    params = dict(predictions=preds, references=labels, average=None)
+    f1 = f1_metric.compute(**params)['f1']
+    precision = precision_metric.compute(**params)['precision']
+    recall = recall_metric.compute(**params)['recall']
+
+    # Print the results
+    print('*** Scores ***')
+    print(f'F1-score: {f1:.4f}')
+    print(f'Precision: {precision:.4f}')
+    print(f'Recall: {recall:.4f}')
 
     breakpoint()
 
