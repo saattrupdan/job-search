@@ -55,9 +55,7 @@ def main():
     # Update file with job listings
     #new_job_listings = job_scraper.scrape_jobs()
     new_job_listings = [dict(url='https://www.google.com',
-                             cleaned_text='This is a test job')]
-
-    breakpoint()
+                             cleaned_text='This is a test job\nYou need to have 10+ years of experience with programming')]
 
     # Split up the job listings into paragraphs
     df = pd.DataFrame.from_records(new_job_listings).drop_duplicates('url')
@@ -83,6 +81,8 @@ def main():
     ])
     mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
     filtered_job_listings = (df.loc[mask, ['url', 'cleaned_text']]
+    filtered_job_listings = (df.reset_index()
+                               .loc[mask, ['url', 'cleaned_text']]
                                .to_dict('records'))
 
     # Send the relevant new job listings by email
