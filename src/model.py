@@ -176,14 +176,14 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=25,
+        num_train_epochs=250,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
         learning_rate=2e-5,
         evaluation_strategy='steps',
-        logging_steps=5,
-        eval_steps=5,
+        logging_steps=10,
+        eval_steps=10,
         report_to='none',
     )
 
@@ -201,9 +201,9 @@ def train_relevance_model():
 
         # Compute the metrics
         params = dict(predictions=preds, references=labels, average=None)
-        f1 = f1_metric.compute(**params)['f1']
-        precision = precision_metric.compute(**params)['precision']
-        recall = recall_metric.compute(**params)['recall']
+        f1 = f1_metric.compute(**params)['f1'][1]
+        precision = precision_metric.compute(**params)['precision'][1]
+        recall = recall_metric.compute(**params)['recall'][1]
 
         return dict(f1=f1, precision=precision, recall=recall)
 
