@@ -146,7 +146,7 @@ def train_relevance_model():
 
     # Convert the data to a HuggingFace dataset
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
-                                     label=df.bad.tolist()))
+                                     label=df.bad.astype(float).tolist()))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.8)
