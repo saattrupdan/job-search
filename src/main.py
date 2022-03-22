@@ -56,6 +56,8 @@ def main():
     # Update file with job listings
     new_job_listings = job_scraper.scrape_jobs()
 
+    breakpoint()
+
     # Split up the job listings into paragraphs
     df = pd.DataFrame.from_records(new_job_listings).drop_duplicates('url')
     df['cleaned_text'] = df.cleaned_text.str.split('\n')
