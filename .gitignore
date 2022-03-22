@@ -131,3 +131,8 @@ dmypy.json
 # Data files
 data/
 models/
+
+# Model training
+checkpoint*/
+wandb/
+runs/
