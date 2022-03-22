@@ -146,12 +146,10 @@ def train_relevance_model():
     for i in range(100):
         extra_df = (df.sample(frac=0.5, replace=False, random_state=i)
                       .groupby('url')
-                      .agg(dict(cleaned_text=lambda x: ' '.join(x),
+                      .agg(dict(cleaned_text=lambda x: '\n'.join(x),
                                 bad=lambda x: any(x))))
         dfs.append(extra_df)
     df = pd.concat(dfs)
-
-    breakpoint()
 
     # Convert the data to a HuggingFace dataset
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
