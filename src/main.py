@@ -3,6 +3,7 @@
 from emailbot import EmailBot
 from jobscraper import JobScraper
 import pandas as pd
+import numpy as np
 from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification)
@@ -69,6 +70,7 @@ def main():
         for p in df.cleaned_text
     ])
     mask = (filtering_model(**paragraphs).logits > 0).numpy()
+    mask = np.logical_or(mask[:, 0], mask[:, 1])
     df = (df.loc[mask]
             .groupby('url')
             .agg(dict(cleaned_text=lambda x: '\n'.join(x))))
