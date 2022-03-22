@@ -75,6 +75,7 @@ def train_filtering_model():
         logging_steps=50,
         eval_steps=50,
         report_to='none',
+        save_total_limit=0,
     )
 
     # Initialise the trainer
@@ -199,10 +200,13 @@ def train_relevance_model():
         logging_steps=10,
         eval_steps=50,
         report_to='none',
+        save_total_limit=0,
     )
 
     def compute_metrics(pred: EvalPrediction) -> dict:
         '''Computes the metrics for the given predictions'''
+
+        breakpoint()
         # Load the metrics
         f1_metric = load_metric('f1')
         precision_metric = load_metric('precision')
