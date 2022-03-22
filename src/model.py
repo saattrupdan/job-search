@@ -239,8 +239,7 @@ def train_relevance_model():
     all_preds = np.array(all_preds)
 
     # Compute the metrics
-    args = [predictions=torch.tensor(all_preds),
-            references=torch.LongTensor(all_labels)]
+    args = [torch.tensor(all_preds), torch.LongTensor(all_labels)]
     kwargs = dict(average=None)
     f2 = f2_metric(*args, **kwargs)[1].item()
     precision = precision_metric(*args, **kwargs)[1].item()
