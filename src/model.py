@@ -60,6 +60,7 @@ def train_model():
     model = AutoModelForSequenceClassification.from_pretrained(
         model_id,
         num_labels=2,
+        hidden_dropout_prob=0.1,
         classifier_dropout=0.5,
     )
 
@@ -83,7 +84,6 @@ def train_model():
         args=training_args,
         train_dataset=train,
         eval_dataset=val,
-        #compute_metrics=compute_metrics,
         data_collator=data_collator,
     )
 
@@ -101,18 +101,19 @@ def train_model():
     labels = output.label_ids
 
     # Evaluate the model
-    params = dict(predictions=preds, references=labels, average=None)
-    f1 = f1_metric.compute(**params)['f1']
-    precision = precision_metric.compute(**params)['precision']
-    recall = recall_metric.compute(**params)['recall']
+    for idx, task in enumerate(['title_or_tasks', 'requirements']):
+        params = dict(predictions=preds[:, idx],
+                      references=labels[:, idx],
+                      average=None)
+        f1 = f1_metric.compute(**params)['f1']
+        precision = precision_metric.compute(**params)['precision']
+        recall = recall_metric.compute(**params)['recall']
 
-    # Print the results
-    print('*** Scores ***')
-    print(f'F1-score: {f1:.4f}')
-    print(f'Precision: {precision:.4f}')
-    print(f'Recall: {recall:.4f}')
-
-    breakpoint()
+        # Print the results
+        print(f'\n\n*** Scores for {task} ***')
+        print(f'F1-score: {f1:.4f}')
+        print(f'Precision: {precision:.4f}')
+        print(f'Recall: {recall:.4f}')
 
 
 if __name__ == '__main__':
