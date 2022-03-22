@@ -22,16 +22,14 @@ class ClassWeightTrainer(Trainer):
     '''HuggingFace Trainer class for classification with class weights'''
     def __init__(self, pos_weight: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pos_weight = pos_weight
+        self.pos_weight = torch.tensor([pos_weight])
 
     def compute_loss(self, model, inputs, return_outputs: bool = False):
         '''Compute loss for multi-label classification'''
         labels = inputs.pop('labels')
         outputs = model(**inputs)
         logits = outputs.logits
-        weights = torch.tensor([
-            self.pos_weight if lbl == 1 else 1 for lbl in labels
-        ]).float().to(logits.device)
-        loss_fct = nn.BCEWithLogitsLoss(weight=weights)
+        pos_weight = self.pos_weight.to(logits.device)
+        loss_fct = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
         loss = loss_fct(logits.view(-1), labels.float().view(-1))
         return (loss, logits) if return_outputs else loss
