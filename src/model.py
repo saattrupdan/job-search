@@ -156,7 +156,7 @@ def train_relevance_model():
                                      label=df.bad.astype(float).tolist()))
 
     # Split the dataset into training and validation sets
-    splits = dataset.train_test_split(train_size=0.8)
+    splits = dataset.train_test_split(train_size=0.9)
     train = splits['train']
     val = splits['test']
 
@@ -183,14 +183,14 @@ def train_relevance_model():
     # Initialise the training arguments
     training_args = TrainingArguments(
         output_dir='.',
-        num_train_epochs=250,
+        num_train_epochs=25,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         gradient_accumulation_steps=4,
         learning_rate=2e-5,
         evaluation_strategy='steps',
         logging_steps=10,
-        eval_steps=10,
+        eval_steps=50,
         report_to='none',
     )
 
