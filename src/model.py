@@ -4,7 +4,9 @@ from datasets import Dataset, load_metric
 from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification,
-                          TrainingArguments)
+                          TrainingArguments,
+                          Trainer,
+                          EvalPrediction)
 
 from pathlib import Path
 import pandas as pd
@@ -134,14 +136,17 @@ def train_relevance_model():
 
     # Convert data to DataFrame
     df = pd.DataFrame.from_records(job_listings)
-    df = df[['cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
+    df = df[['url', 'cleaned_text', 'title_or_tasks', 'requirements', 'bad']]
     df = (df.explode(['cleaned_text', 'title_or_tasks', 'requirements', 'bad'])
-            .query('title_or_tasks or requirements'))
+            .query('title_or_tasks or requirements')[[
+            .drop(columns=['title_or_tasks', 'requirements'])
+            .groupby('url')
+            .agg(dict(cleaned_text=lambda x: ' '.join(x),
+                      bad=lambda x: any(x))))
 
     # Convert the data to a HuggingFace dataset
-    labels = df[['title_or_tasks', 'requirements']].values
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
-                                     label=labels))
+                                     label=df.bad.tolist()))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.8)
@@ -182,43 +187,39 @@ def train_relevance_model():
         report_to='none',
     )
 
+    def compute_metrics(pred: EvalPrediction) -> dict:
+        '''Computes the metrics for the given predictions'''
+        # Load the metrics
+        f1_metric = load_metric('f1')
+        precision_metric = load_metric('precision')
+        recall_metric = load_metric('recall')
+
+        # Get the predictions and labels
+        preds = pred.predictions > 0
+        labels = pred.label_ids
+
+        # Compute the metrics
+        params = dict(predictions=preds, references=labels, average=None)
+        f1 = f1_metric.compute(**params)['f1']
+        precision = precision_metric.compute(**params)['precision']
+        recall = recall_metric.compute(**params)['recall']
+
+        return dict(f1=f1, precision=precision, recall=recall)
+
     # Initialise the trainer
-    trainer = MultiLabelTrainer(
+    trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train,
         eval_dataset=val,
         data_collator=data_collator,
+        compute_metrics=compute_metrics,
     )
 
     # Train the model
     trainer.train()
 
-    # Initialise the metrics
-    f1_metric = load_metric('f1')
-    precision_metric = load_metric('precision')
-    recall_metric = load_metric('recall')
-
-    # Get the predictions and labels for the validation set
-    output = trainer.predict(val)
-    preds = output.predictions > 0
-    labels = output.label_ids
-
-    # Evaluate the model
-    for idx, task in enumerate(['title_or_tasks', 'requirements']):
-        params = dict(predictions=preds[:, idx],
-                      references=labels[:, idx],
-                      average=None)
-        f1 = f1_metric.compute(**params)['f1']
-        precision = precision_metric.compute(**params)['precision']
-        recall = recall_metric.compute(**params)['recall']
-
-        # Print the results
-        print(f'\n\n*** Scores for {task} ***')
-        print(f'F1-score: {100 * f1:.2f}')
-        print(f'Precision: {100 * precision:.2f}')
-        print(f'Recall: {100 * recall:.2f}')
-
 
 if __name__ == '__main__':
-    train_filtering_model()
+    #train_filtering_model()
+    train_relevance_model()
