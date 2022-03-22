@@ -218,9 +218,9 @@ def train_relevance_model():
     trainer.train()
 
     # Initialise the metrics
-    f1_metric = tm.F1Score(average=None)
-    precision_metric = tm.Precision(average=None)
-    recall_metric = tm.Recall(average=None)
+    f2_metric = tm.FBetaScore(beta=2, average='none')
+    precision_metric = tm.Precision(average='none')
+    recall_metric = tm.Recall(average='none')
 
     # Get the predictions and labels for the validation set
     model.cpu().eval()
@@ -239,13 +239,13 @@ def train_relevance_model():
     # Compute the metrics
     breakpoint()
     params = dict(predictions=all_preds, references=all_labels, average=None)
-    f1 = f1_metric(**params)['f1'][1]
+    f2 = f2_metric(**params)['f2'][1]
     precision = precision_metric(**params)['precision'][1]
     recall = recall_metric(**params)['recall'][1]
 
     # Print the results
     print(f'\n*** Scores ***')
-    print(f'F1-score: {100 * f1:.2f}')
+    print(f'F2-score: {100 * f2:.2f}')
     print(f'Precision: {100 * precision:.2f}')
     print(f'Recall: {100 * recall:.2f}')
 
