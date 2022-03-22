@@ -116,8 +116,8 @@ def train_filtering_model():
         preds = model(**inputs).logits[0] > 0
         all_labels.extend(list(labels))
         all_preds.extend(list(preds))
-    all_labels = torch.tensor(all_labels)
-    all_preds = torch.LongTensor(all_preds)
+    all_labels = torch.tensor(np.array(all_labels))
+    all_preds = torch.LongTensor(np.array(all_preds))
 
     # Evaluate the model
     for idx, task in enumerate(['title_or_tasks', 'requirements']):
