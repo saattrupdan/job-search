@@ -79,7 +79,7 @@ def train_filtering_model():
         gradient_accumulation_steps=4,
         learning_rate=2e-5,
         evaluation_strategy='steps',
-        logging_steps=50,
+        logging_steps=10,
         eval_steps=50,
         report_to='none',
         save_total_limit=0,
