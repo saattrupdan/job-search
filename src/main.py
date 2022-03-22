@@ -109,7 +109,7 @@ def main():
         tokenizer(listing, truncation=True, max_length=512)
         for listing in df.cleaned_text
     ])
-    mask = (relevance_model(**filtered_job_listings).logits < 0).numpy()
+    mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
     relevant_job_listings = (df.reset_index()
                                .loc[mask, ['url', 'cleaned_text']]
                                .to_dict('records'))
