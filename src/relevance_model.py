@@ -50,8 +50,6 @@ def train_relevance_model():
         dfs.append(extra_df)
     df = pd.concat(dfs)
 
-    print(df)
-
     # Convert the data to a HuggingFace dataset
     labels = 1 - df.bad.astype(float)
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
