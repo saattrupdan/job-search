@@ -100,7 +100,7 @@ def train_filtering_model():
     trainer.train()
 
     # Initialise the metrics
-    params = dict(average='none', num_classes=2)
+    params = dict(average='none', num_classes=1)
     f1_metric = tm.FBetaScore(beta=1, **params)
     precision_metric = tm.Precision(**params)
     recall_metric = tm.Recall(**params)
@@ -244,20 +244,17 @@ def train_relevance_model():
 
     # Get the predictions and labels for the validation set
     model.cpu().eval()
-    all_labels = list()
-    all_preds = list()
+    all_labels = torch.zeros(len(val), 1).long()
+    all_preds = torch.zeros(len(val), 1)
     for idx in range(len(val)):
         inputs = data_collator(val.remove_columns(['text'])[idx:idx+1])
-        labels = inputs.labels
+        all_labels[idx] = inputs.labels
         inputs.pop('labels')
         preds = model(**inputs).logits[0] > 0
-        all_labels.extend(list(labels))
-        all_preds.extend(list(preds))
-    all_labels = np.array(all_labels)
-    all_preds = np.array(all_preds)
+        all_preds[idx] = preds
 
     # Compute the metrics
-    args = [torch.tensor(all_preds), torch.LongTensor(all_labels)]
+    args = [all_preds, all_labels]
     f2 = f2_metric(*args)[1].item()
     precision = precision_metric(*args)[1].item()
     recall = recall_metric(*args)[1].item()
