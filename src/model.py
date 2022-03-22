@@ -119,6 +119,13 @@ def train_filtering_model():
         print(f'Precision: {100 * precision:.2f}')
         print(f'Recall: {100 * recall:.2f}')
 
+    # Save the model
+    model_dir = Path('models')
+    if not model_dir.exists():
+        model_dir.mkdir()
+    model_path = model_dir / 'filtering_model'
+    model.save_pretrained(str(model_path))
+
 
 def train_relevance_model():
     '''Trains the relevance model and stores it to disk'''
@@ -227,7 +234,14 @@ def train_relevance_model():
     # Train the model
     trainer.train()
 
+    # Save the model
+    model_dir = Path('models')
+    if not model_dir.exists():
+        model_dir.mkdir()
+    model_path = model_dir / 'relevance_model'
+    model.save_pretrained(str(model_path))
+
 
 if __name__ == '__main__':
-    #train_filtering_model()
+    train_filtering_model()
     train_relevance_model()
