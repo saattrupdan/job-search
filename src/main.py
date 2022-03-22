@@ -4,12 +4,41 @@ from emailbot import EmailBot
 from jobscraper import JobScraper
 import pandas as pd
 import numpy as np
+import logging
 from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification)
 
 
+# Set up logging
+fmt = '%(asctime)s [%(levelname)s] %(message)s'
+logging.basicConfig(level=logging.INFO, format=fmt)
+logger = logging.getLogger(__name__)
+
+
 def main():
+
+    # Create email bot
+    email_bot = EmailBot()
+
+    logger.info('Loading tokenizer and model')
+
+    # Load filtering and relevance tokenizers
+    tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
+
+    # Load filtering and relevance models
+    filtering_model = AutoModelForSequenceClassification.from_pretrained(
+        './models/filtering_model'
+    ).cpu().eval()
+    relevance_model = AutoModelForSequenceClassification.from_pretrained(
+        './models/relevance_model'
+    ).cpu().eval()
+
+    # Initialise data collators
+    data_collator = DataCollatorWithPadding(tokenizer)
+
+    logger.info('Starting job scraper')
+
     # Create list of relevant queries
     queries = [
         'analytical chemistry',
@@ -35,27 +64,21 @@ def main():
     # Create job scraper
     job_scraper = JobScraper(queries=queries)
 
-    # Create email bot
-    email_bot = EmailBot()
-
-    # Load filtering and relevance tokenizers
-    tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
-
-    # Load filtering and relevance models
-    filtering_model = AutoModelForSequenceClassification.from_pretrained(
-        './models/filtering_model'
-    ).cpu().eval()
-    relevance_model = AutoModelForSequenceClassification.from_pretrained(
-        './models/relevance_model'
-    ).cpu().eval()
-
-    # Initialise data collators
-    data_collator = DataCollatorWithPadding(tokenizer)
+    logger.info('Scraping new job listings')
 
     # Update file with job listings
     #new_job_listings = job_scraper.scrape_jobs()
-    new_job_listings = [dict(url='https://www.google.com',
-                             cleaned_text='This is a test job\nYou need to have 10+ years of experience with programming')]
+    new_job_listings = [
+        dict(url='https://www.google.com',
+             cleaned_text='This is a test job\n'
+                           'You need to have 10+ years of experience'),
+        dict(url='https://www.notgoogle.com',
+             cleaned_text='This is another test job\n'
+                           'You will be working with GC-MS'),
+    ]
+
+    logger.info(f'Found {len(new_job_listings):,} new job listings')
+    logger.info('Filtering paragraphs of new job listings')
 
     # Split up the job listings into paragraphs
     df = pd.DataFrame.from_records(new_job_listings).drop_duplicates('url')
@@ -73,26 +96,36 @@ def main():
             .groupby('url')
             .agg(dict(cleaned_text=lambda x: '\n'.join(x))))
 
+    logger.info(f'Found {int(mask.sum()):,} relevant paragraphs out '
+                f'of {mask.shape[0]:,}.')
+    logger.info(f'Classifying the relevance of the resulting {len(df):,} '
+                f'job listings')
+
     # Use the relevance model on the resulting filtered job listings to arrive
     # at the relevant ones
     filtered_job_listings = data_collator([
         tokenizer(listing, truncation=True, max_length=512)
         for listing in df.cleaned_text
     ])
-    mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
-    filtered_job_listings = (df.loc[mask, ['url', 'cleaned_text']]
-    filtered_job_listings = (df.reset_index()
+    mask = (relevance_model(**filtered_job_listings).logits < 0).numpy()
+    relevant_job_listings = (df.reset_index()
                                .loc[mask, ['url', 'cleaned_text']]
                                .to_dict('records'))
 
+    logger.info(f'Found {len(relevant_job_listings):,} relevant job listings')
+
     # Send the relevant new job listings by email
-    email_bot.send_job_listings(relevant_job_listings,
-                                to='saattrupdan@gmail.com')
-    email_bot.send_job_listings(relevant_job_listings,
-                                to='amy.smart1@btinternet.com')
+    if len(relevant_job_listings) > 0:
+        logger.info('Sending email with relevant job listings')
+        email_bot.send_job_listings(relevant_job_listings,
+                                    to='saattrupdan@gmail.com')
+        #email_bot.send_job_listings(relevant_job_listings,
+        #                            to='amy.smart1@btinternet.com')
 
     # Close the job_scraper
     job_scraper.close()
+
+    logger.info('All done!')
 
 
 if __name__ == '__main__':

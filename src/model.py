@@ -5,14 +5,13 @@ from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification,
                           TrainingArguments,
-                          Trainer,
                           EvalPrediction)
 
 from pathlib import Path
 import pandas as pd
 import json
 import os
-from multilabel_trainer import MultiLabelTrainer
+from trainers import MultiLabelTrainer, ClassWeightTrainer
 
 
 def train_filtering_model():
@@ -159,8 +158,9 @@ def train_relevance_model():
     df = pd.concat(dfs)
 
     # Convert the data to a HuggingFace dataset
+    labels = 1 - df.bad.astype(float)
     dataset = Dataset.from_dict(dict(text=df.cleaned_text.tolist(),
-                                     label=df.bad.astype(float).tolist()))
+                                     label=labels.tolist()))
 
     # Split the dataset into training and validation sets
     splits = dataset.train_test_split(train_size=0.9)
@@ -222,13 +222,14 @@ def train_relevance_model():
         return dict(f1=f1, precision=precision, recall=recall)
 
     # Initialise the trainer
-    trainer = Trainer(
+    trainer = ClassWeightTrainer(
         model=model,
         args=training_args,
         train_dataset=train,
         eval_dataset=val,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        pos_weight=5,
     )
 
     # Train the model

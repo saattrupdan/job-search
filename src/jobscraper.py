@@ -11,7 +11,6 @@ from jobindex import JobIndex
 from dtu import DTU
 from thehub import TheHub
 from ku import KU
-from emailbot import EmailBot
 
 
 # Enable tqdm with pandas

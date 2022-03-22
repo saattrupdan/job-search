@@ -6,6 +6,7 @@ from selenium.webdriver import ChromeOptions
 from time import sleep
 from bs4 import BeautifulSoup
 from typing import Union
+import logging
 
 
 class BaseScraper:
@@ -22,7 +23,9 @@ class BaseScraper:
         self.headless = headless
 
         # Install the Chrome web driver
+        logging.getLogger().setLevel(logging.CRITICAL)
         chrome_installer.install()
+        logging.getLogger().setLevel(logging.INFO)
 
         # Initialise Chrome web driver
         options = ChromeOptions()
