@@ -100,7 +100,7 @@ def train_filtering_model():
     trainer.train()
 
     # Initialise the metrics
-    params = dict(average='none', num_classes=1)
+    params = dict(average='none', num_classes=2, multiclass=True)
     f1_metric = tm.FBetaScore(beta=1, **params)
     precision_metric = tm.Precision(**params)
     recall_metric = tm.Recall(**params)
