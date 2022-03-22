@@ -257,6 +257,8 @@ def train_relevance_model():
     print(f'Precision: {100 * precision:.2f}')
     print(f'Recall: {100 * recall:.2f}')
 
+    breakpoint()
+
     # Save the model
     model_dir = Path('models')
     if not model_dir.exists():
