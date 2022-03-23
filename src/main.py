@@ -70,50 +70,52 @@ def main():
     new_job_listings = job_scraper.scrape_jobs()
 
     logger.info(f'Found {len(new_job_listings):,} new job listings')
-    logger.info('Filtering paragraphs of new job listings')
 
-    # Split up the job listings into paragraphs
-    df = pd.DataFrame.from_records(new_job_listings).drop_duplicates('url')
-    df['cleaned_text'] = df.cleaned_text.str.split('\n')
-    df = df.explode('cleaned_text').reset_index(drop=True)
+    if len(new_job_listings) > 0:
+        logger.info('Filtering paragraphs of new job listings')
 
-    # Use the filtering model to filter out irrelevant paragraphs
-    paragraphs = data_collator([
-        tokenizer(p, truncation=True, max_length=512)
-        for p in df.cleaned_text
-    ])
-    mask = (filtering_model(**paragraphs).logits > 0).numpy()
-    mask = np.logical_or(mask[:, 0], mask[:, 1])
-    df = (df.loc[mask]
-            .groupby('url')
-            .agg(dict(cleaned_text=lambda x: ' '.join(x))))
-    df['cleaned_text'] = df.cleaned_text.str.lower()
+        # Split up the job listings into paragraphs
+        df = pd.DataFrame.from_records(new_job_listings).drop_duplicates('url')
+        df['cleaned_text'] = df.cleaned_text.str.split('\n')
+        df = df.explode('cleaned_text').reset_index(drop=True)
 
-    logger.info(f'Found {int(mask.sum()):,} relevant paragraphs out '
-                f'of {mask.shape[0]:,}.')
-    logger.info(f'Classifying the relevance of the resulting {len(df):,} '
-                f'job listings')
+        # Use the filtering model to filter out irrelevant paragraphs
+        paragraphs = data_collator([
+            tokenizer(p, truncation=True, max_length=512)
+            for p in df.cleaned_text
+        ])
+        mask = (filtering_model(**paragraphs).logits > 0).numpy()
+        mask = np.logical_or(mask[:, 0], mask[:, 1])
+        df = (df.loc[mask]
+                .groupby('url')
+                .agg(dict(cleaned_text=lambda x: ' '.join(x))))
+        df['cleaned_text'] = df.cleaned_text.str.lower()
 
-    # Use the relevance model on the resulting filtered job listings to arrive
-    # at the relevant ones
-    filtered_job_listings = data_collator([
-        tokenizer(listing, truncation=True, max_length=512)
-        for listing in df.cleaned_text
-    ])
-    mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
-    relevant_job_listings = (df.reset_index()
-                               .loc[mask, ['url', 'cleaned_text']]
-                               .to_dict('records'))
+        logger.info(f'Found {int(mask.sum()):,} relevant paragraphs out '
+                    f'of {mask.shape[0]:,}.')
+        logger.info(f'Classifying the relevance of the resulting {len(df):,} '
+                    f'job listings')
 
-    logger.info(f'Found {len(relevant_job_listings):,} relevant job listings')
+        # Use the relevance model on the resulting filtered job listings to
+        # arrive at the relevant ones
+        filtered_job_listings = data_collator([
+            tokenizer(listing, truncation=True, max_length=512)
+            for listing in df.cleaned_text
+        ])
+        mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
+        relevant_job_listings = (df.reset_index()
+                                   .loc[mask, ['url', 'cleaned_text']]
+                                   .to_dict('records'))
 
-    # Send the relevant new job listings by email
-    if len(relevant_job_listings) > 0:
-        logger.info('Sending email with relevant job listings')
-        email_bot.send_job_listings(relevant_job_listings,
-                                    to='saattrupdan@gmail.com')
-        email_bot.send_job_listings(relevant_job_listings,
-                                    to='amy.smart1@btinternet.com')
+        logger.info(f'Found {len(relevant_job_listings):,} relevant job ads')
+
+        # Send the relevant new job listings by email
+        if len(relevant_job_listings) > 0:
+            logger.info('Sending email with relevant job listings')
+            email_bot.send_job_listings(relevant_job_listings,
+                                        to='saattrupdan@gmail.com')
+            email_bot.send_job_listings(relevant_job_listings,
+                                        to='amy.smart1@btinternet.com')
 
     # Close the job_scraper
     job_scraper.close()
