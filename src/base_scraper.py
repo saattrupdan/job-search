@@ -2,7 +2,7 @@
 
 import chromedriver_autoinstaller as chrome_installer
 from selenium import webdriver
-from selenium.webdriver import ChromeOptions
+from selenium.webdriver import FirefoxOptions
 from time import sleep
 from bs4 import BeautifulSoup
 from typing import Union
@@ -22,15 +22,15 @@ class BaseScraper:
     def __init__(self, headless: bool = True):
         self.headless = headless
 
-        # Install the Chrome web driver
+        # Install the Firefox web driver
         logging.getLogger().setLevel(logging.CRITICAL)
         chrome_installer.install()
         logging.getLogger().setLevel(logging.INFO)
 
-        # Initialise Chrome web driver
-        options = ChromeOptions()
+        # Initialise Firefox web driver
+        options = FirefoxOptions()
         options.headless = headless
-        self._driver = webdriver.Chrome(chrome_options=options)
+        self._driver = webdriver.Firefox(options=options)
 
     @property
     def name(self) -> str:
