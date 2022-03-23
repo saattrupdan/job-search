@@ -44,8 +44,9 @@ class EmailBot:
                      'Cheerio',
                      'See ya',
                      'Later',
-                     'Farvel',
-                     'Farveller',
+                     'Hilsen',
+                     'Med venlig hilsen',
+                     'Kærlig hilsen',
                      'Vi ses',
                      'Hej hej']
         return random.choice(farewells)
