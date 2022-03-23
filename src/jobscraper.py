@@ -1,6 +1,6 @@
 '''Class that queries job listings from various sites and filters them'''
 
-from typing import List, Union
+from typing import List, Union, Optional
 from pathlib import Path
 import json
 from tqdm.auto import tqdm
@@ -83,40 +83,64 @@ class JobScraper:
                     job_listings = job_site.query(query=query,
                                                   urls_to_ignore=self._urls)
                     all_job_listings.extend(job_listings)
-                    self._store_jobs(job_listings)
             else:
                 job_listings = job_site.query(urls_to_ignore=self._urls)
                 all_job_listings.extend(job_listings)
-                self._store_jobs(job_listings)
 
-        # Clean all the job listings on disk
-        self.clean_jobs()
+        # Clean all the new job listings
+        all_job_listings = self.clean_jobs(all_job_listings)
+
+        # Store the cleaned new job listings to disk
+        self._store_jobs(all_job_listings)
 
         # Return the new job listings
         return all_job_listings
 
-    def clean_jobs(self):
-        '''Cleans all the stored job listings'''
-        if self.listing_path.exists():
+    def clean_jobs(self,
+                   job_listings: Optional[List[dict]] = None) -> List[dict]:
+        '''Cleans all the stored job listings.
 
-            # Open the file and read in all the job listings
+        Args:
+            job_listings (list of dict or None, optional):
+                List of job listings to clean. If None then all job listings on
+                disk will be loaded instead. Defaults to None.
+
+        Returns:
+            list of dict:
+                List of cleaned job listings.
+
+        Raises:
+            FileNotFoundError:
+                If the listing_path does not exist and `job_listings` is None.
+        '''
+        if not self.listing_path.exists() and job_listings is None:
+            raise FileNotFoundError(f'{self.listing_path} does not exist')
+
+        # Open the file and read in all the job listings if `job_listings` is
+        # not specified
+        if job_listings is None:
             with self.listing_path.open('r') as f:
                 job_listings = [json.loads(line) for line in f]
 
-            # Convert the job listings to a Pandas DataFrame
-            df = pandas.DataFrame.from_records(job_listings)
+        # Convert the job listings to a Pandas DataFrame
+        df = pandas.DataFrame.from_records(job_listings)
 
-            # Drop duplicates in the job listings
-            df.drop_duplicates(subset='url', inplace=True)
+        # Drop duplicates in the job listings
+        df.drop_duplicates(subset='url', inplace=True)
 
-            # Truncate the `text` column to 100,000 characters
-            df['text'] = df.text.apply(lambda x: x[:100_000])
+        # Truncate the `text` column to 100,000 characters
+        df['text'] = df.text.apply(lambda x: x[:100_000])
 
-            # Add a `cleaned_text` column to the DataFrame
-            df['cleaned_text'] = df.text.progress_apply(clean_job_listing)
+        # Add a `cleaned_text` column to the DataFrame
+        df['cleaned_text'] = df.text.progress_apply(clean_job_listing)
 
-            # Store the cleaned job listings
-            self._store_jobs(df.to_dict('records'), overwrite=True)
+        # Replace the `job_listings` list with the cleaned listings
+        job_listings = df.to_dict('records')
+
+        # Store the cleaned job listings
+        self._store_jobs(job_listings, overwrite=True)
+
+        return job_listings
 
     def _store_jobs(self, job_listings: List[dict], overwrite: bool = False):
         '''Stores job listings to a JSONL file.
