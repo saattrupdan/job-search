@@ -48,11 +48,11 @@ class JobScraper:
         self.listing_path = Path(listing_path)
         self.overwrite = overwrite
         self.headless = headless
-        self._job_sites = [
-            JobIndex(num_pages=num_pages, headless=headless),
-            TheHub(num_pages=num_pages, headless=headless),
-            KU(num_pages=num_pages, headless=headless),
-            DTU(headless=headless),
+        self._job_site_classes = [
+            JobIndex,
+            TheHub,
+            KU,
+            DTU,
         ]
         self._urls = list()
 
@@ -76,7 +76,13 @@ class JobScraper:
         # Query all the job sites for all the queries and save the job listings
         # to disk
         all_job_listings = list()
-        for job_site in self._job_sites:
+        for job_site_class in self._job_site_classes:
+
+            # Initialise the job site
+            job_site = job_site_class(num_pages=self.num_pages,
+                                      headless=self.headless)
+
+            # Query the job site for all the queries
             if job_site.uses_queries:
                 desc = f'Fetching and parsing jobs from {job_site.name}'
                 for query in tqdm(self.queries, desc=desc):
@@ -86,6 +92,9 @@ class JobScraper:
             else:
                 job_listings = job_site.query(urls_to_ignore=self._urls)
                 all_job_listings.extend(job_listings)
+
+            # Close the job site
+            job_site.close()
 
         if len(all_job_listings) > 0:
 
@@ -158,8 +167,3 @@ class JobScraper:
             for job_listing in job_listings:
                 f.write(json.dumps(job_listing))
                 f.write('\n')
-
-    def close(self):
-        '''Closes the job sites'''
-        for job_site in self._job_sites:
-            job_site.close()

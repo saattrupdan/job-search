@@ -53,9 +53,6 @@ def main():
     # Update file with job listings
     new_job_listings = job_scraper.scrape_jobs()
 
-    # Close the job_scraper
-    job_scraper.close()
-
     logger.info(f'Found {len(new_job_listings):,} new job listings')
 
     if len(new_job_listings) > 0:

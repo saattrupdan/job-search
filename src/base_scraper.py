@@ -17,7 +17,7 @@ class BaseScraper:
     Attributes:
         headless (bool): Whether to run the web driver in headless mode.
     '''
-    def __init__(self, headless: bool = True):
+    def __init__(self, headless: bool = True, **_):
         self.headless = headless
 
         # Initialise web driver
