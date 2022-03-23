@@ -2,14 +2,21 @@
 
 import yagmail
 import random
+from dotenv import load_dotenv
 from typing import List
+import os
+
+
+# Load .env file
+load_dotenv()
 
 
 class EmailBot:
     '''Automatic sending of emails with newest job listings'''
 
     def __init__(self):
-        self.email = yagmail.SMTP('amysjobbot')
+        pwd = os.environ.get('GMAIL_PASSWORD')
+        self.email = yagmail.SMTP('amysjobbot', pwd)
 
     def _random_greeting(self) -> str:
         '''Generate a random greeting.
