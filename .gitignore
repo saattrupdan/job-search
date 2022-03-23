@@ -128,8 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Data files
-data/
+# Model files
 models/
 
 # Model training
