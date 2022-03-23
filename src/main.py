@@ -18,8 +18,6 @@ logger = logging.getLogger(__name__)
 
 def main():
 
-    logger.info('Starting job scraper.')
-
     # Create email bot
     email_bot = EmailBot()
 
