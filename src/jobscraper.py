@@ -148,8 +148,9 @@ class JobScraper:
         # Replace the `job_listings` list with the cleaned listings
         job_listings = df.to_dict('records')
 
-        # Store the cleaned job listings
-        self._store_jobs(job_listings, overwrite=True)
+        # Store the cleaned job listings if no `job_listings` were specified
+        if job_listings is None:
+            self._store_jobs(job_listings, overwrite=True)
 
         return job_listings
 
