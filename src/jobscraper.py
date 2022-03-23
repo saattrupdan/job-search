@@ -87,11 +87,13 @@ class JobScraper:
                 job_listings = job_site.query(urls_to_ignore=self._urls)
                 all_job_listings.extend(job_listings)
 
-        # Clean all the new job listings
-        all_job_listings = self.clean_jobs(all_job_listings)
+        if len(all_job_listings) > 0:
 
-        # Store the cleaned new job listings to disk
-        self._store_jobs(all_job_listings)
+            # Clean all the new job listings
+            all_job_listings = self.clean_jobs(all_job_listings)
+
+            # Store the cleaned new job listings to disk
+            self._store_jobs(all_job_listings)
 
         # Return the new job listings
         return all_job_listings
