@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def main():
 
-    logger.info('Starting job scraper')
+    logger.info('Starting job scraper.')
 
     # Create email bot
     email_bot = EmailBot()
@@ -56,7 +56,7 @@ def main():
     logger.info(f'Found {len(new_job_listings):,} new job listing(s).')
 
     if len(new_job_listings) > 0:
-        logger.info('Loading tokenizer and model')
+        logger.info('Loading tokenizer and model.')
 
         # Load filtering and relevance tokenizers
         tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
@@ -107,11 +107,11 @@ def main():
                                    .loc[mask, ['url', 'cleaned_text']]
                                    .to_dict('records'))
 
-        logger.info(f'Found {len(relevant_job_listings):,} relevant job ads')
+        logger.info(f'Found {len(relevant_job_listings):,} relevant job ads.')
 
         # Send the relevant new job listings by email
         if len(relevant_job_listings) > 0:
-            logger.info('Sending email with relevant job listings')
+            logger.info('Sending email with relevant job listings.')
             email_bot.send_job_listings(relevant_job_listings,
                                         to='saattrupdan@gmail.com')
             email_bot.send_job_listings(relevant_job_listings,
