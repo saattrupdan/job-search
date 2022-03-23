@@ -48,12 +48,12 @@ def main():
     # Create job scraper
     job_scraper = JobScraper(queries=queries)
 
-    logger.info('Scraping new job listings')
+    logger.info('Scraping new job listings.')
 
     # Update file with job listings
     new_job_listings = job_scraper.scrape_jobs()
 
-    logger.info(f'Found {len(new_job_listings):,} new job listings')
+    logger.info(f'Found {len(new_job_listings):,} new job listing(s).')
 
     if len(new_job_listings) > 0:
         logger.info('Loading tokenizer and model')
@@ -72,7 +72,7 @@ def main():
         # Initialise data collators
         data_collator = DataCollatorWithPadding(tokenizer)
 
-        logger.info('Filtering paragraphs of new job listings')
+        logger.info('Filtering paragraphs of new job listings.')
 
         # Split up the job listings into paragraphs
         df = pd.DataFrame.from_records(new_job_listings).drop_duplicates('url')
@@ -91,10 +91,10 @@ def main():
                 .agg(dict(cleaned_text=lambda x: ' '.join(x))))
         df['cleaned_text'] = df.cleaned_text.str.lower()
 
-        logger.info(f'Found {int(mask.sum()):,} relevant paragraphs out '
-                    f'of {mask.shape[0]:,}.')
+        logger.info(f'Extracted {int(mask.sum()):,} paragraphs out of '
+                    f'{mask.shape[0]:,}.')
         logger.info(f'Classifying the relevance of the resulting {len(df):,} '
-                    f'job listings')
+                    f'job listing(s).')
 
         # Use the relevance model on the resulting filtered job listings to
         # arrive at the relevant ones
