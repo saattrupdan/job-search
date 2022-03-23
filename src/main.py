@@ -18,26 +18,10 @@ logger = logging.getLogger(__name__)
 
 def main():
 
+    logger.info('Starting job scraper')
+
     # Create email bot
     email_bot = EmailBot()
-
-    logger.info('Loading tokenizer and model')
-
-    # Load filtering and relevance tokenizers
-    tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
-
-    # Load filtering and relevance models
-    filtering_model = AutoModelForSequenceClassification.from_pretrained(
-        'saattrupdan/job-listing-filtering-model'
-    ).cpu().eval()
-    relevance_model = AutoModelForSequenceClassification.from_pretrained(
-        'saattrupdan/job-listing-relevance-model'
-    ).cpu().eval()
-
-    # Initialise data collators
-    data_collator = DataCollatorWithPadding(tokenizer)
-
-    logger.info('Starting job scraper')
 
     # Create list of relevant queries
     queries = [
@@ -69,9 +53,28 @@ def main():
     # Update file with job listings
     new_job_listings = job_scraper.scrape_jobs()
 
+    # Close the job_scraper
+    job_scraper.close()
+
     logger.info(f'Found {len(new_job_listings):,} new job listings')
 
     if len(new_job_listings) > 0:
+        logger.info('Loading tokenizer and model')
+
+        # Load filtering and relevance tokenizers
+        tokenizer = AutoTokenizer.from_pretrained('xlm-roberta-base')
+
+        # Load filtering and relevance models
+        filtering_model = AutoModelForSequenceClassification.from_pretrained(
+            'saattrupdan/job-listing-filtering-model'
+        ).cpu().eval()
+        relevance_model = AutoModelForSequenceClassification.from_pretrained(
+            'saattrupdan/job-listing-relevance-model'
+        ).cpu().eval()
+
+        # Initialise data collators
+        data_collator = DataCollatorWithPadding(tokenizer)
+
         logger.info('Filtering paragraphs of new job listings')
 
         # Split up the job listings into paragraphs
@@ -116,9 +119,6 @@ def main():
                                         to='saattrupdan@gmail.com')
             email_bot.send_job_listings(relevant_job_listings,
                                         to='amy.smart1@btinternet.com')
-
-    # Close the job_scraper
-    job_scraper.close()
 
     logger.info('All done!')
 
