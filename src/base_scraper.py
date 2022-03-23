@@ -1,6 +1,6 @@
 '''Base class for scraping job listings from websites'''
 
-import chromedriver_autoinstaller as chrome_installer
+# import chromedriver_autoinstaller as chrome_installer
 from selenium import webdriver
 from selenium.webdriver import FirefoxOptions
 from time import sleep
@@ -23,9 +23,9 @@ class BaseScraper:
         self.headless = headless
 
         # Install the Firefox web driver
-        logging.getLogger().setLevel(logging.CRITICAL)
-        chrome_installer.install()
-        logging.getLogger().setLevel(logging.INFO)
+        # logging.getLogger().setLevel(logging.CRITICAL)
+        # chrome_installer.install()
+        # logging.getLogger().setLevel(logging.INFO)
 
         # Initialise Firefox web driver
         options = FirefoxOptions()
