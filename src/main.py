@@ -67,16 +67,7 @@ def main():
     logger.info('Scraping new job listings')
 
     # Update file with job listings
-    #new_job_listings = job_scraper.scrape_jobs()
-    new_job_listings = [
-        dict(url='https://www.google.com',
-             cleaned_text='This is a test job\n'
-                           'You need to have 10+ years of experience in a '
-                           'pharmaceutical company'),
-        dict(url='https://www.notgoogle.com',
-             cleaned_text='This is another test job\n'
-                           'You will be working with GC-MS'),
-    ]
+    new_job_listings = job_scraper.scrape_jobs()
 
     logger.info(f'Found {len(new_job_listings):,} new job listings')
     logger.info('Filtering paragraphs of new job listings')
@@ -121,8 +112,8 @@ def main():
         logger.info('Sending email with relevant job listings')
         email_bot.send_job_listings(relevant_job_listings,
                                     to='saattrupdan@gmail.com')
-        #email_bot.send_job_listings(relevant_job_listings,
-        #                            to='amy.smart1@btinternet.com')
+        email_bot.send_job_listings(relevant_job_listings,
+                                    to='amy.smart1@btinternet.com')
 
     # Close the job_scraper
     job_scraper.close()
