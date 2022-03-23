@@ -1,12 +1,10 @@
 '''Base class for scraping job listings from websites'''
 
-# import chromedriver_autoinstaller as chrome_installer
 from selenium import webdriver
 from selenium.webdriver import FirefoxOptions
 from time import sleep
 from bs4 import BeautifulSoup
 from typing import Union
-import logging
 
 
 class BaseScraper:
@@ -22,12 +20,7 @@ class BaseScraper:
     def __init__(self, headless: bool = True):
         self.headless = headless
 
-        # Install the Firefox web driver
-        # logging.getLogger().setLevel(logging.CRITICAL)
-        # chrome_installer.install()
-        # logging.getLogger().setLevel(logging.INFO)
-
-        # Initialise Firefox web driver
+        # Initialise web driver
         options = FirefoxOptions()
         options.headless = headless
         self._driver = webdriver.Firefox(options=options)
