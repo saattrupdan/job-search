@@ -39,7 +39,7 @@ class JobScraper:
     '''
     def __init__(self,
                  queries: List[str],
-                 num_pages: int = 3,
+                 num_pages: int = 10,
                  listing_path: Union[str, Path] = 'data/job_listings.jsonl',
                  overwrite: bool = False,
                  headless: bool = True):
