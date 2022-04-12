@@ -77,12 +77,18 @@ def main():
         df['cleaned_text'] = df.cleaned_text.str.split('\n')
         df = df.explode('cleaned_text').reset_index(drop=True)
 
-        # Use the filtering model to filter out irrelevant paragraphs
-        paragraphs = data_collator([
-            tokenizer(p, truncation=True, max_length=512)
-            for p in df.cleaned_text
-        ])
-        mask = (filtering_model(**paragraphs).logits > 0).numpy()
+        # Use the filtering model to create a mask containing the relevant
+        # paragraphs
+        masks = list()
+        for p in df.cleaned_text:
+            paragraphs = data_collator([
+                tokenizer(p, truncation=True, max_length=512)
+            ])
+            mask = (filtering_model(**paragraphs).logits > 0)
+            masks.append(mask)
+        mask = np.stack(masks, axis=0)
+
+        # Use the mask to filter out the irrelevant paragraphs
         mask = np.logical_or(mask[:, 0], mask[:, 1])
         df = (df.loc[mask]
                 .groupby('url')
@@ -96,11 +102,15 @@ def main():
 
         # Use the relevance model on the resulting filtered job listings to
         # arrive at the relevant ones
-        filtered_job_listings = data_collator([
-            tokenizer(listing, truncation=True, max_length=512)
-            for listing in df.cleaned_text
-        ])
-        mask = (relevance_model(**filtered_job_listings).logits > 0).numpy()
+        masks = list()
+        for listing in df.cleaned_text:
+            filtered_job_listings = data_collator([
+                tokenizer(listing, truncation=True, max_length=512)
+            ])
+            mask_entry = (relevance_model(**filtered_job_listings).logits > 0)
+            masks.append(mask_entry.numpy())
+        mask = np.stack(masks, axis=0)
+
         relevant_job_listings = (df.reset_index()
                                    .loc[mask, ['url', 'cleaned_text']]
                                    .to_dict('records'))
