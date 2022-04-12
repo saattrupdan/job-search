@@ -5,6 +5,7 @@ from jobscraper import JobScraper
 import pandas as pd
 import numpy as np
 import logging
+from tqdm.auto import tqdm
 from transformers import (AutoTokenizer,
                           DataCollatorWithPadding,
                           AutoModelForSequenceClassification)
@@ -80,7 +81,7 @@ def main():
         # Use the filtering model to create a mask containing the relevant
         # paragraphs
         masks = list()
-        for p in df.cleaned_text:
+        for p in tqdm(df.cleaned_text, desc='Filtering paragraphs'):
             paragraphs = data_collator([
                 tokenizer(p, truncation=True, max_length=512)
             ])
@@ -103,7 +104,7 @@ def main():
         # Use the relevance model on the resulting filtered job listings to
         # arrive at the relevant ones
         masks = list()
-        for listing in df.cleaned_text:
+        for listing in tqdm(df.cleaned_text, desc='Filtering listings'):
             filtered_job_listings = data_collator([
                 tokenizer(listing, truncation=True, max_length=512)
             ])
