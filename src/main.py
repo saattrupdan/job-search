@@ -86,7 +86,7 @@ def main():
                 tokenizer(p, truncation=True, max_length=512)
             ])
             mask = (filtering_model(**paragraphs).logits > 0)
-            masks.append(mask)
+            masks.append(mask.numpy()[0])
         mask = np.stack(masks, axis=0)
 
         # Use the mask to filter out the irrelevant paragraphs
@@ -109,7 +109,7 @@ def main():
                 tokenizer(listing, truncation=True, max_length=512)
             ])
             mask_entry = (relevance_model(**filtered_job_listings).logits > 0)
-            masks.append(mask_entry.numpy())
+            masks.append(mask_entry.numpy()[0])
         mask = np.stack(masks, axis=0)
 
         relevant_job_listings = (df.reset_index()
