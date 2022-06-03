@@ -1,7 +1,7 @@
 '''Base class for scraping job listings from websites'''
 
 from selenium import webdriver
-from selenium.webdriver import FirefoxOptions
+from selenium.webdriver import ChromeOptions
 from time import sleep
 from bs4 import BeautifulSoup
 from typing import Union
@@ -21,9 +21,9 @@ class BaseScraper:
         self.headless = headless
 
         # Initialise web driver
-        options = FirefoxOptions()
+        options = ChromeOptions()
         options.headless = headless
-        self._driver = webdriver.Firefox(options=options)
+        self._driver = webdriver.Chrome(options=options)
 
     @property
     def name(self) -> str:
