@@ -135,3 +135,6 @@ models/
 checkpoint*/
 wandb/
 runs/
+
+node_modules/
+**/*.json
